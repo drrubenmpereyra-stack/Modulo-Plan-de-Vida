@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Plan Gráfico Definitivo</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bordo: #881337;
+            --cian-light: #e0f2fe;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #042f2e;
+            color: #f8fafc;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .controls-top {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: #4c0519; transform: translateY(-2px); }
+        .btn-secundario { background-color: #0e7490; }
+        .btn-secundario:hover { background-color: #155e75; }
+
+        /* Contenedor Lienzo Absoluto con la Imagen de Fondo */
+        .canvas-container {
+            position: relative;
+            width: 100%;
+            max-width: 1100px;
+            aspect-ratio: 1056 / 912; /* Proporción exacta de la imagen plan_vida.jpg */
+            background-image: url('plan_vida.jpg');
+            background-size: cover;
+            background-position: center;
+            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.7);
+            overflow: hidden;
+            border: 2px solid rgba(224, 242, 254, 0.2);
+        }
+
+        /* Capas de Texto Superpuestas sobre los Paneles de la Imagen */
+        .overlay-box {
+            position: absolute;
+            font-size: 0.8rem;
+            color: #f8fafc;
+            overflow-y: auto;
+            padding: 5px;
+            box-sizing: border-box;
+            scrollbar-width: thin;
+            scrollbar-color: var(--bordo) transparent;
+        }
+
+        /* Posicionamiento porcentual exacto sobre los paneles de la infografía */
+        #box-objetivos {
+            top: 36%;
+            left: 5.5%;
+            width: 32%;
+            height: 27%;
+        }
+
+        #box-metas {
+            top: 36%;
+            right: 5.5%;
+            width: 32%;
+            height: 27%;
+        }
+
+        #box-recursos {
+            bottom: 6%;
+            left: 5.5%;
+            width: 32%;
+            height: 27%;
+        }
+
+        #box-tiempos {
+            bottom: 6%;
+            right: 5.5%;
+            width: 32%;
+            height: 27%;
+        }
+
+        /* Contenedor Foto del Paciente (en el centro, sobre el avatar de autorrealización) */
+        #box-foto-paciente {
+            position: absolute;
+            top: 37%;
+            left: 45.5%;
+            width: 9%;
+            aspect-ratio: 1;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--bordo);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.6);
+            background: rgba(8, 51, 68, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #box-foto-paciente img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-line {
+            margin-bottom: 6px;
+            border-bottom: 1px solid rgba(224, 242, 254, 0.1);
+            padding-bottom: 4px;
+            line-height: 1.3;
+        }
+
+        .item-line strong {
+            color: var(--cian-light);
+        }
+
+        @media print {
+            body { background: #fff; padding: 0; }
+            .controls-top { display: none !important; }
+            .canvas-container { border: none; box-shadow: none; width: 100%; max-width: 100%; }
+            .overlay-box { color: #000 !important; }
+            .item-line strong { color: #000 !important; }
+            .item-line { border-bottom: 1px solid #ccc; }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <div class="controls-top">
+        <button type="button" class="btn" onclick="cargarPlanGrafico()"><i class="fa-solid fa-rotate"></i> Actualizar Datos</button>
+        <button type="button" class="btn btn-secundario" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir / Guardar PDF</button>
+    </div>
+
+    <!-- Lienzo Absoluto Infográfico -->
+    <div class="canvas-container" id="canvas-plano">
+        <!-- Foto del Paciente Central -->
+        <div id="box-foto-paciente">
+            <img id="paciente-img-src" src="https://via.placeholder.com/150?text=Foto" alt="Paciente" onerror="this.src='https://via.placeholder.com/150?text=Sin+Foto'">
+        </div>
+
+        <!-- Paneles de Contenido Dinámico -->
+        <div id="box-objetivos" class="overlay-box">Cargando objetivos...</div>
+        <div id="box-metas" class="overlay-box">Cargando metas...</div>
+        <div id="box-recursos" class="overlay-box">Cargando recursos...</div>
+        <div id="box-tiempos" class="overlay-box">Cargando tiempos...</div>
+    </div>
+
+    <script>
+        let db, patientCode, patientDocId;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+
+            patientCode = sessionStorage.getItem('patientCode');
+            await identificarPacienteDoc();
+            cargarPlanGrafico();
+        });
+
+        async function identificarPacienteDoc() {
+            if (!patientCode) return;
+            const snap = await db.collection("pacientes").where("codigo", "==", patientCode).get();
+            snap.forEach(doc => { patientDocId = doc.id; });
+        }
+
+        window.cargarPlanGrafico = async function() {
+            if (!patientDocId) {
+                alert("No se identificó el código del paciente en la sesión.");
+                return;
+            }
+
+            try {
+                const docSnap = await db.collection("pacientes").doc(patientDocId).get();
+                const data = docSnap.data();
+
+                // 1. Foto del Paciente (si está almacenada en Firestore como URL o Base64)
+                if (data.foto_url || data.foto) {
+                    document.getElementById('paciente-img-src').src = data.foto_url || data.foto;
+                }
+
+                // 2. Objetivos
+                const objBox = document.getElementById('box-objetivos');
+                const objetivos = data.plan_objetivos || [];
+                objBox.innerHTML = objetivos.length ? objetivos.map((o, i) => `<div class="item-line"><strong>${i+1}.</strong> ${o.descripcion}</div>`).join('') : '<em style="color:#cbd5e1;">Sin objetivos registrados.</em>';
+
+                // 3. Metas
+                const metBox = document.getElementById('box-metas');
+                const metas = data.plan_metas || [];
+                metBox.innerHTML = metas.length ? metas.map((m, i) => `<div class="item-line"><strong>${i+1}.</strong> ${m.descripcion}<br><span style="font-size:0.75rem; color:#e0f2fe;">Éxito: ${m.indicador}</span></div>`).join('') : '<em style="color:#cbd5e1;">Sin metas registradas.</em>';
+
+                // 4. Recursos
+                const recBox = document.getElementById('box-recursos');
+                const recursos = data.plan_recursos || [];
+                recBox.innerHTML = recursos.length ? recursos.map((r, i) => `<div class="item-line"><strong>${i+1}.</strong> ${r.descripcion}</div>`).join('') : '<em style="color:#cbd5e1;">Sin recursos registrados.</em>';
+
+                // 5. Tiempos / Hitos
+                const tieBox = document.getElementById('box-tiempos');
+                const tiempos = data.plan_tiempos || [];
+                tieBox.innerHTML = tiempos.length ? tiempos.map((t, i) => `<div class="item-line"><strong>${t.fase}</strong> (${t.fecha})<br><span style="font-size:0.75rem; color:#e0f2fe;">${t.hitos}</span></div>`).join('') : '<em style="color:#cbd5e1;">Sin cronograma registrado.</em>';
+
+            } catch (e) {
+                console.error("Error al cargar datos del plan gráfico:", e);
+            }
+        }
+    </script>
+</body>
+</html>
