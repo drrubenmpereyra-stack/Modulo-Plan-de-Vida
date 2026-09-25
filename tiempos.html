@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Tiempos y Línea de Tiempo del Plan de Vida</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        input, textarea { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+            width: 100%;
+            box-sizing: border-box;
+        }
+        input:focus, textarea:focus { border-color: var(--bordo); box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); }
+
+        .btn-container { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 5px; }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+        .btn-secundario { background-color: #0e7490; }
+        .btn-secundario:hover { background-color: #155e75; }
+
+        .item-card { background: rgba(8, 51, 68, 0.6); border-left: 4px solid var(--bordo); padding: 15px; border-radius: 8px; margin-top: 10px; text-align: left; }
+
+        /* Contenedor Gráfico Línea de Tiempo (SVG) */
+        .timeline-container {
+            display: none;
+            background: rgba(4, 47, 46, 0.95);
+            border: 2px solid var(--bordo);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        .timeline-title {
+            color: var(--cian-light);
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .timeline-svg-wrapper {
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        @media print {
+            body { background: #fff; color: #000; padding: 0; }
+            .card, .item-card, .timeline-container { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+            .btn { display: none !important; }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <main class="container">
+        <!-- Formulario Cronograma -->
+        <div class="card">
+            <h2><i class="fa-solid fa-clock"></i> Delimitación de Tiempos y Plazos Transicionales</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Organice el cronograma temporal para el seguimiento de sus metas, respetando un ritmo biológico y psicológico sostenible.</p>
+            
+            <form onsubmit="event.preventDefault(); guardarTiempo();">
+                <div class="form-grid" style="margin-bottom: 12px;">
+                    <div class="form-group">
+                        <label for="input-fase">Fase / Plazo</label>
+                        <input type="text" id="input-fase" placeholder="Ej: Corto Plazo (1 a 3 meses)" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="input-fecha-meta">Fecha Objetivo</label>
+                        <input type="date" id="input-fecha-meta" required>
+                    </div>
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="input-hitos">Hitos y Seguimiento</label>
+                    <textarea id="input-hitos" placeholder="Ej: Evaluación de avance quincenal y revisión de cargas alostáticas..." style="min-height: 80px; resize: vertical;" required></textarea>
+                </div>
+                
+                <div class="btn-container">
+                    <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Guardar Cronograma</button>
+                    <button type="button" class="btn btn-secundario" onclick="generarGraficoLineaTiempo()"><i class="fa-solid fa-timeline"></i> Graficar Línea de Tiempo</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Esquema Gráfico: Línea de Tiempo (SVG Dinámico) -->
+        <div id="timeline-box" class="timeline-container">
+            <div class="timeline-title"><i class="fa-solid fa-chart-line"></i> Esquema Gráfico: Línea de Tiempo y Hitos Principales</div>
+            <div class="timeline-svg-wrapper" id="timeline-svg-content">
+                <!-- Se inyecta dinámicamente el SVG según los hitos -->
+            </div>
+        </div>
+
+        <!-- Listado de Cronograma -->
+        <div class="card">
+            <h2><i class="fa-solid fa-list-check"></i> Cronograma Registrado</h2>
+            <div id="lista-tiempos">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Cargando tiempos...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db, patientCode, patientDocId;
+        let tiemposCache = [];
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+
+            patientCode = sessionStorage.getItem('patientCode');
+            await identificarPacienteDoc();
+            cargarTiempos();
+        });
+
+        async function identificarPacienteDoc() {
+            if (!patientCode) return;
+            const snap = await db.collection("pacientes").where("codigo", "==", patientCode).get();
+            snap.forEach(doc => { patientDocId = doc.id; });
+        }
+
+        window.guardarTiempo = async function() {
+            const fase = document.getElementById('input-fase').value.trim();
+            const fecha = document.getElementById('input-fecha-meta').value;
+            const hitos = document.getElementById('input-hitos').value.trim();
+            if (!fase || !patientDocId) return;
+
+            const nuevoT = { id: Date.now().toString(), fase, fecha, hitos };
+
+            try {
+                const ref = db.collection("pacientes").doc(patientDocId);
+                const docSnap = await ref.get();
+                const data = docSnap.data();
+                const tiempos = data.plan_tiempos || [];
+                tiempos.push(nuevoT);
+
+                await ref.update({ plan_tiempos: tiempos });
+                document.getElementById('input-fase').value = '';
+                document.getElementById('input-hitos').value = '';
+                alert("¡Cronograma guardado con éxito!");
+                cargarTiempos();
+            } catch (e) {
+                console.error(e);
+                alert("Error al guardar el cronograma.");
+            }
+        }
+
+        async function cargarTiempos() {
+            if (!patientDocId) return;
+            const container = document.getElementById('lista-tiempos');
+            try {
+                const docSnap = await db.collection("pacientes").doc(patientDocId).get();
+                const data = docSnap.data();
+                tiemposCache = data.plan_tiempos || [];
+
+                container.innerHTML = '';
+                if (tiemposCache.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No hay cronogramas registrados todavía.</p>';
+                    document.getElementById('timeline-box').style.display = 'none';
+                    return;
+                }
+
+                tiemposCache.forEach((t, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'item-card';
+                    div.innerHTML = `<strong>${t.fase}</strong> (Fecha límite: ${t.fecha})<br><span style="font-size: 0.85rem; color: var(--cian-light);">Hitos: ${t.hitos}</span>`;
+                    container.appendChild(div);
+                });
+
+                // Generar automáticamente el gráfico si hay datos
+                generarGraficoLineaTiempo();
+            } catch (e) {
+                console.error(e);
+            }
+        }
+
+        window.generarGraficoLineaTiempo = function() {
+            const box = document.getElementById('timeline-box');
+            const wrapper = document.getElementById('timeline-svg-content');
+
+            if (!tiemposCache || tiemposCache.length === 0) {
+                alert("No hay hitos temporales registrados para graficar.");
+                box.style.display = 'none';
+                return;
+            }
+
+            // Ordenar hitos cronológicamente por fecha
+            let ordenados = [...tiemposCache].sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
+            const n = ordenados.length;
+            const svgWidth = Math.max(650, n * 160);
+            const svgHeight = 220;
+            const yLine = 110;
+            const startX = 60;
+            const endX = svgWidth - 60;
+            const step = n > 1 ? (endX - startX) / (n - 1) : 0;
+
+            let svgContent = `<svg viewBox="0 0 ${svgWidth} ${svgHeight}" width="100%" height="100%">`;
+            
+            // Línea base de tiempo principal
+            svgContent += `<line x1="${startX - 20}" y1="${yLine}" x2="${endX + 20}" y2="${yLine}" stroke="#22d3ee" stroke-width="3" stroke-opacity="0.5" />`;
+
+            ordenados.forEach((item, index) => {
+                const cx = n === 1 ? svgWidth / 2 : startX + (index * step);
+                const cy = yLine;
+
+                // Círculo del hito
+                svgContent += `<circle cx="${cx}" cy="${cy}" r="8" fill="#881337" stroke="#22d3ee" stroke-width="2" />`;
+                svgContent += `<circle cx="${cx}" cy="${cy}" r="3" fill="#e0f2fe" />`;
+
+                // Fecha (Coordenada temporal superior)
+                svgContent += `<text x="${cx}" y="${cy - 25}" fill="#22d3ee" font-size="12" font-weight="bold" text-anchor="middle">${item.fecha}</text>`;
+
+                // Fase / Etiqueta
+                svgContent += `<text x="${cx}" y="${cy + 25}" fill="#ffffff" font-size="11" font-weight="bold" text-anchor="middle">${item.fase}</text>`;
+
+                // Hitos / Descripción (más abajo)
+                const descLines = dividirTexto(item.hitos, 22);
+                descLines.forEach((line, lIdx) => {
+                    svgContent += `<text x="${cx}" y="${cy + 45 + (lIdx * 14)}" fill="#cbd5e1" font-size="10" text-anchor="middle">${line}</text>`;
+                });
+            });
+
+            svgContent += `</svg>`;
+            wrapper.innerHTML = svgContent;
+            box.style.display = 'block';
+        };
+
+        function dividirTexto(texto, maxChars) {
+            if (!texto) return [""];
+            if (texto.length <= maxChars) return [texto];
+            let palabras = texto.split(" ");
+            let lineas = [];
+            let lineaActual = "";
+
+            palabras.forEach(palabra => {
+                if ((lineaActual + palabra).length > maxChars) {
+                    lineas.push(lineaActual.trim());
+                    lineaActual = palabra + " ";
+                } else {
+                    lineaActual += palabra + " ";
+                }
+            });
+            if (lineaActual.trim()) lineas.push(lineaActual.trim());
+            return lineas.slice(0, 2); // Máximo 2 líneas para que no se sature el gráfico
+        }
+    </script>
+</body>
+</html>

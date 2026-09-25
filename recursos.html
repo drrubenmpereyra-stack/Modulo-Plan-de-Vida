@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Recursos del Plan de Vida</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        textarea { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+            min-height: 100px;
+            resize: vertical;
+            width: 100%;
+            box-sizing: border-box;
+        }
+        textarea:focus { border-color: var(--bordo); box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+
+        .item-card { background: rgba(8, 51, 68, 0.6); border-left: 4px solid var(--bordo); padding: 15px; border-radius: 8px; margin-top: 10px; text-align: left; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+    <main class="container">
+        <div class="card">
+            <h2><i class="fa-solid fa-toolbox"></i> Identificación de Recursos (Sostén Subjetivo y Pragmático)</h2>
+            <p style="font-size: 0.9rem; color: var(--text-muted); margin: 0;">Mapee sus activos internos (resiliencia, motivación) y externos (redes de apoyo, márgenes de energía alostática) para sostener el plan.</p>
+            
+            <form onsubmit="event.preventDefault(); guardarRecurso();">
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="input-recurso">Descripción del Recurso</label>
+                    <textarea id="input-recurso" placeholder="Ej: Red de contención familiar estable, disposición de tiempo libre los fines de semana, capacidad reflexiva..." required></textarea>
+                </div>
+                <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Guardar Recurso</button>
+            </form>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-list-check"></i> Recursos Registrados</h2>
+            <div id="lista-recursos">
+                <p style="color: var(--text-muted); font-size: 0.9rem;">Cargando recursos...</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db, patientCode, patientDocId;
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+
+            patientCode = sessionStorage.getItem('patientCode');
+            await identificarPacienteDoc();
+            cargarRecursos();
+        });
+
+        async function identificarPacienteDoc() {
+            if (!patientCode) return;
+            const snap = await db.collection("pacientes").where("codigo", "==", patientCode).get();
+            snap.forEach(doc => { patientDocId = doc.id; });
+        }
+
+        window.guardarRecurso = async function() {
+            const texto = document.getElementById('input-recurso').value.trim();
+            if (!texto || !patientDocId) return;
+
+            const nuevoRec = { id: Date.now().toString(), descripcion: texto, fecha: new Date().toISOString() };
+
+            try {
+                const ref = db.collection("pacientes").doc(patientDocId);
+                const docSnap = await ref.get();
+                const data = docSnap.data();
+                const recursos = data.plan_recursos || [];
+                recursos.push(nuevoRec);
+
+                await ref.update({ plan_recursos: recursos });
+                document.getElementById('input-recurso').value = '';
+                alert("¡Recurso guardado con éxito!");
+                cargarRecursos();
+            } catch (e) {
+                console.error(e);
+                alert("Error al guardar el recurso.");
+            }
+        }
+
+        async function cargarRecursos() {
+            if (!patientDocId) return;
+            const container = document.getElementById('lista-recursos');
+            try {
+                const docSnap = await db.collection("pacientes").doc(patientDocId).get();
+                const data = docSnap.data();
+                const recursos = data.plan_recursos || [];
+
+                container.innerHTML = '';
+                if (recursos.length === 0) {
+                    container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem;">No hay recursos registrados todavía.</p>';
+                    return;
+                }
+
+                recursos.forEach((rec, idx) => {
+                    const div = document.createElement('div');
+                    div.className = 'item-card';
+                    div.innerHTML = `<strong>Recurso ${idx + 1}:</strong><br>${rec.descripcion}`;
+                    container.appendChild(div);
+                });
+            } catch (e) {
+                console.error(e);
+            }
+        }
+    </script>
+</body>
+</html>
