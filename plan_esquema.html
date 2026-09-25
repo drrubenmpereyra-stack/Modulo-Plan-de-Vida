@@ -103,12 +103,13 @@
             height: 27%;
         }
 
-        /* Contenedor Foto del Paciente (en el centro, sobre el avatar de autorrealización) */
+        /* Contenedor Foto del Paciente ubicado exactamente a un top del 3% desde el borde superior */
         #box-foto-paciente {
             position: absolute;
-            top: 37%;
-            left: 45.5%;
-            width: 9%;
+            top: 3%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 8%;
             aspect-ratio: 1;
             border-radius: 50%;
             overflow: hidden;
@@ -159,7 +160,7 @@
 
     <!-- Lienzo Absoluto Infográfico -->
     <div class="canvas-container" id="canvas-plano">
-        <!-- Foto del Paciente Central -->
+        <!-- Foto del Paciente ubicada en top: 3% del borde superior -->
         <div id="box-foto-paciente">
             <img id="paciente-img-src" src="https://via.placeholder.com/150?text=Foto" alt="Paciente" onerror="this.src='https://via.placeholder.com/150?text=Sin+Foto'">
         </div>
@@ -207,7 +208,7 @@
                 const docSnap = await db.collection("pacientes").doc(patientDocId).get();
                 const data = docSnap.data();
 
-                // 1. Foto del Paciente (si está almacenada en Firestore como URL o Base64)
+                // 1. Foto del Paciente
                 if (data.foto_url || data.foto) {
                     document.getElementById('paciente-img-src').src = data.foto_url || data.foto;
                 }
