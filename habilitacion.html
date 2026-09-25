@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Habilitación de Paciente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        select, input[type="date"] { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        
+        select:focus, input[type="date"]:focus { 
+            border-color: var(--bordo); 
+            box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); 
+        }
+
+        select option { background: #083344; color: #fff; }
+
+        .info-box {
+            background: rgba(8, 51, 68, 0.8);
+            border: 1px solid rgba(224, 242, 254, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(8, 51, 68, 0.6);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(224, 242, 254, 0.2);
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--bordo);
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+            font-size: 1rem;
+            color: #fff;
+            font-weight: bold;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <!-- Tarjeta de Selección de Paciente -->
+        <div class="card">
+            <h2><i class="fa-solid fa-user-check"></i> Habilitación de Plan de Vida y Resultados para Paciente</h2>
+            <div class="form-group">
+                <label for="select-patient">Buscar y Seleccionar Paciente</label>
+                <select id="select-patient" onchange="cargarInformacionPaciente()">
+                    <option value="">-- Seleccione un paciente --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Información y Habilitación -->
+        <div id="habilitacion-form-card" class="card" style="display: none;">
+            <h2><i class="fa-solid fa-file-waveform"></i> Información del Informe Final e Historial</h2>
+            
+            <div class="form-group">
+                <label for="fecha-habilitacion">Fecha de Habilitación / Revisión</label>
+                <input type="date" id="fecha-habilitacion">
+            </div>
+
+            <div class="info-box" id="info-paciente-preview">
+                Cargando datos del informe general del paciente...
+            </div>
+
+            <div class="checkbox-group">
+                <input type="checkbox" id="check-habilitado">
+                <label for="check-habilitado">Habilitado para visualización del paciente (Visible en su módulo de resultados y planes)</label>
+            </div>
+
+            <div style="display: flex; justify-content: flex-start; margin-top: 10px;">
+                <button type="button" class="btn" onclick="guardarHabilitacion()"><i class="fa-solid fa-floppy-disk"></i> Guardar Habilitación en Base de Datos</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let activePatientId = null;
+        let patientDataCache = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            initPacientes();
+        });
+
+        async function initPacientes() {
+            try {
+                const querySnapshot = await db.collection("pacientes").get();
+                const selectEl = document.getElementById('select-patient');
+                selectEl.innerHTML = '<option value="">-- Seleccione un paciente --</option>';
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const opt = document.createElement('option');
+                    opt.value = docSnap.id;
+                    opt.textContent = data.nombre || data.name || `Paciente (${docSnap.id})`;
+                    selectEl.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Error al cargar pacientes:", error);
+            }
+        }
+
+        window.cargarInformacionPaciente = async function() {
+            activePatientId = document.getElementById('select-patient').value;
+            const formCard = document.getElementById('habilitacion-form-card');
+
+            if (!activePatientId) {
+                formCard.style.display = 'none';
+                patientDataCache = null;
+                return;
+            }
+
+            try {
+                const patientRef = db.collection("pacientes").doc(activePatientId);
+                const patientSnap = await patientRef.get();
+                if (patientSnap.exists) {
+                    patientDataCache = patientSnap.data();
+                }
+            } catch (error) {
+                console.error("Error al obtener datos del paciente:", error);
+            }
+
+            formCard.style.display = 'flex';
+            document.getElementById('fecha-habilitacion').valueAsDate = new Date();
+
+            renderizarDatosInforme();
+        }
+
+        function renderizarDatosInforme() {
+            const previewBox = document.getElementById('info-paciente-preview');
+            const checkbox = document.getElementById('check-habilitado');
+
+            if (!patientDataCache) return;
+
+            const matrices = patientDataCache.matrices_generales || [];
+            let ultimoInforme = matrices.length > 0 ? matrices[matrices.length - 1] : null;
+
+            // Comprobar estado de habilitación previo guardado en el documento principal del paciente
+            const estadoHabilitacion = patientDataCache.habilitado_paciente || false;
+            checkbox.checked = estadoHabilitacion;
+
+            if (!ultimoInforme) {
+                previewBox.innerHTML = `<strong>Paciente:</strong> ${patientDataCache.nombre || 'Sin nombre'}<br><br><em>No se encontró ninguna Matriz General o Informe Final registrado previamente para este paciente.</em>`;
+                return;
+            }
+
+            previewBox.innerHTML = `
+                <strong>Paciente:</strong> ${patientDataCache.nombre || 'Sin nombre'}<br>
+                <strong>Última Fecha de Consolidación:</strong> ${ultimoInforme.fecha}<br>
+                <strong>Perfil Clínico Global:</strong> <span style="color: var(--cian-light); font-weight: bold;">${ultimoInforme.perfil}</span><br>
+                <strong>Promedio General:</strong> ${ultimoInforme.promedio}%<br><br>
+                <strong>Pautas Orientativas:</strong><br>
+                <em>${ultimoInforme.pautasPlanVida}</em><br><br>
+                <strong>Notas Clínicas:</strong><br>
+                ${ultimoInforme.observaciones || 'Sin observaciones registradas.'}
+            `;
+        }
+
+        window.guardarHabilitacion = async function() {
+            if (!activePatientId) {
+                alert("Seleccione un paciente.");
+                return;
+            }
+
+            const estaHabilitado = document.getElementById('check-habilitado').checked;
+            const fechaHb = document.getElementById('fecha-habilitacion').value;
+
+            try {
+                const patientRef = db.collection("pacientes").doc(activePatientId);
+                
+                await patientRef.update({
+                    habilitado_paciente: estaHabilitado,
+                    fecha_habilitacion: fechaHb
+                });
+
+                patientDataCache.habilitado_paciente = estaHabilitado;
+                patientDataCache.fecha_habilitacion = fechaHb;
+
+                alert(estaHabilitado ? "¡Paciente habilitado con éxito! El informe ya está disponible en su vista." : "El paciente ha sido deshabilitado.");
+            } catch (error) {
+                console.error("Error al guardar la habilitación:", error);
+                alert("Error al actualizar la habilitación en la base de datos.");
+            }
+        }
+    </script>
+</body>
+</html>

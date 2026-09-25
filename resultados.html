@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Resultados del Paciente</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .patient-header-info {
+            background: rgba(8, 51, 68, 0.8);
+            border: 1px solid rgba(224, 242, 254, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--cian-light);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+        .btn-secundario { background-color: #0e7490; }
+        .btn-secundario:hover { background-color: #155e75; }
+
+        .info-box {
+            background: rgba(8, 51, 68, 0.8);
+            border: 1px solid rgba(224, 242, 254, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .radar-container {
+            background: rgba(4, 47, 46, 0.95);
+            border: 2px solid var(--bordo);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .radar-svg-wrapper {
+            max-width: 350px;
+            margin: 0 auto;
+        }
+
+        @media print {
+            body { background: #fff; color: #000; padding: 0; }
+            .card, .info-box, .patient-header-info { background: #fff !important; color: #000 !important; border: 1px solid #ccc !important; box-shadow: none !important; }
+            .btn, header { display: none !important; }
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <!-- Tarjeta de Identificación y Consulta -->
+        <div class="card">
+            <h2><i class="fa-solid fa-square-poll-vertical"></i> Resultados y Plan de Vida del Paciente</h2>
+            <div class="patient-header-info">
+                <span id="patient-name-display"><i class="fa-solid fa-user"></i> Identificando paciente...</span>
+                <button type="button" class="btn" onclick="consultarResultados()"><i class="fa-solid fa-magnifying-glass"></i> Consultar Resultados</button>
+            </div>
+        </div>
+
+        <!-- Resultados e Informe Habilitado -->
+        <div id="results-content-card" class="card" style="display: none;">
+            <h2><i class="fa-solid fa-file-contract"></i> Informe Clínico Consolidado e Habilitado</h2>
+            
+            <div class="info-box" id="resultado-detalle-box">
+                <!-- Se inyecta la información del informe -->
+            </div>
+
+            <!-- Gráfico de Radar Dinámico (SVG Nativo) -->
+            <div class="radar-container" id="radar-section" style="display: none;">
+                <div style="color: var(--cian-light); font-size: 0.95Font; font-weight: bold; margin-bottom: 10px;"><i class="fa-solid fa-spider"></i> Gráfico de Radar Multidimensional</div>
+                <div class="radar-svg-wrapper">
+                    <svg viewBox="0 0 400 400" width="100%" height="100%">
+                        <!-- Fondo y Red Concéntrica Pentagonal -->
+                        <polygon points="200,40 352,151 294,330 106,330 48,151" fill="none" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                        <polygon points="200,85 293,153 257,267 143,267 107,153" fill="none" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4" stroke-opacity="0.3" />
+                        <polygon points="200,130 234,155 220,205 180,205 166,155" fill="none" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                        
+                        <!-- Ejes Centrales -->
+                        <line x1="200" y1="200" x2="200" y2="40" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                        <line x1="200" y1="200" x2="352" y2="151" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                        <line x1="200" y1="200" x2="294" y2="330" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                        <line x1="200" y1="200" x2="106" y2="330" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                        <line x1="200" y1="200" x2="48" y2="151" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+
+                        <!-- Polígono Dinámico de Resultados del Paciente -->
+                        <polygon id="radar-polygon" points="200,200 200,200 200,200 200,200 200,200" fill="rgba(136, 19, 55, 0.4)" stroke="#881337" stroke-width="2" />
+
+                        <!-- Puntos de los Vértices -->
+                        <circle id="dot-1" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                        <circle id="dot-2" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                        <circle id="dot-3" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                        <circle id="dot-4" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                        <circle id="dot-5" cx="200" cy="200" r="4" fill="#e0f2fe" />
+
+                        <!-- Etiquetas de los 5 Ejes -->
+                        <text x="200" y="25" fill="#e0f2fe" font-size="11" text-anchor="middle">Autenticidad</text>
+                        <text x="365" y="150" fill="#e0f2fe" font-size="11" text-anchor="start">Urgencia / Sentido</text>
+                        <text x="310" y="355" fill="#e0f2fe" font-size="11" text-anchor="start">Viabilidad</text>
+                        <text x="90" y="355" fill="#e0f2fe" font-size="11" text-anchor="end">Cuestionario Vital</text>
+                        <text x="35" y="150" fill="#e0f2fe" font-size="11" text-anchor="end">Maslow</text>
+                    </svg>
+                </div>
+            </div>
+
+            <div style="display: flex; gap: 12px; margin-top: 10px;">
+                <button type="button" class="btn btn-secundario" onclick="window.print()"><i class="fa-solid fa-print"></i> Imprimir / Guardar PDF</button>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let patientCode = null;
+        let patientName = null;
+        let patientDocData = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            patientCode = sessionStorage.getItem('patientCode');
+            patientName = sessionStorage.getItem('userName');
+
+            const nameDisplay = document.getElementById('patient-name-display');
+            if (patientName) {
+                nameDisplay.innerHTML = `<i class="fa-solid fa-user-check" style="color: #22d3ee;"></i> Paciente: ${patientName}`;
+            } else {
+                nameDisplay.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color: #fca5a5;"></i> Sesión no identificada como paciente.`;
+            }
+        });
+
+        window.consultarResultados = async function() {
+            if (!patientCode) {
+                alert("No se encontró el código de sesión del paciente. Por favor, vuelva a iniciar sesión.");
+                return;
+            }
+
+            try {
+                const querySnapshot = await db.collection("pacientes")
+                    .where("codigo", "==", patientCode)
+                    .get();
+
+                if (querySnapshot.empty) {
+                    alert("No se encontró el registro del paciente en la base de datos.");
+                    return;
+                }
+
+                querySnapshot.forEach(docSnap => {
+                    patientDocData = docSnap.data();
+                });
+
+                const isHabilitado = patientDocData.habilitado_paciente || false;
+                const resultsCard = document.getElementById('results-content-card');
+                const detalleBox = document.getElementById('resultado-detalle-box');
+                const radarSection = document.getElementById('radar-section');
+
+                if (!isHabilitado) {
+                    resultsCard.style.display = 'flex';
+                    detalleBox.innerHTML = `<strong>Aviso Clínico:</strong> Su informe general aún no ha sido habilitado por el profesional a cargo. Por favor, aguarde la revisión institucional.`;
+                    radarSection.style.display = 'none';
+                    return;
+                }
+
+                const matrices = patientDocData.matrices_generales || [];
+                if (matrices.length === 0) {
+                    resultsCard.style.display = 'flex';
+                    detalleBox.innerHTML = `<strong>Aviso Clínico:</strong> Su cuenta está habilitada, pero aún no se registran matrices generales consolidadas.`;
+                    radarSection.style.display = 'none';
+                    return;
+                }
+
+                matrices.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                const ultimo = matrices[0];
+
+                resultsCard.style.display = 'flex';
+                radarSection.style.display = 'block';
+
+                detalleBox.innerHTML = `
+                    <strong>Paciente:</strong> ${patientDocData.nombre || patientName}<br>
+                    <strong>Fecha de Habilitación:</strong> ${patientDocData.fecha_habilitacion || ultimo.fecha}<br>
+                    <strong>Perfil Clínico Proyectivo:</strong> <span style="color: var(--cian-light); font-weight: bold;">${ultimo.perfil}</span><br>
+                    <strong>Índice de Madurez Global:</strong> ${ultimo.promedio}%<br><br>
+                    <strong>Puntajes Históricos Obtenidos:</strong><br>
+                    - Mapa de Autenticidad: ${ultimo.puntajes.autenticidad}/9<br>
+                    - Urgencia y Sentido: ${ultimo.puntajes.urgencia}/9<br>
+                    - Viabilidad Pragmática: ${ultimo.puntajes.viabilidad}/9<br>
+                    - Cuestionario Vital: ${ultimo.puntajes.vital}/15<br>
+                    - Pirámide de Maslow: ${ultimo.puntajes.maslow}/19<br><br>
+                    <strong>Pautas Orientativas para su Plan de Vida:</strong><br>
+                    <em>${ultimo.pautasPlanVida}</em><br><br>
+                    <strong>Observaciones del Especialista:</strong><br>
+                    ${ultimo.observaciones || 'Sin observaciones adicionales.'}
+                `;
+
+                dibujarRadar(ultimo.puntajes);
+
+            } catch (error) {
+                console.error("Error al consultar resultados:", error);
+                alert("Error de conexión al buscar los resultados.");
+            }
+        };
+
+        function dibujarRadar(scores) {
+            const v1 = scores.autenticidad / 9;
+            const v2 = scores.urgencia / 9;
+            const v3 = scores.viabilidad / 9;
+            const v4 = scores.vital / 15;
+            const v5 = scores.maslow / 19;
+
+            const R = 160;
+            const getCoord = (val, angleDeg) => {
+                const rad = (angleDeg - 90) * (Math.PI / 180);
+                const x = 200 + (R * val * Math.cos(rad));
+                const y = 200 + (R * val * Math.sin(rad));
+                return { x, y };
+            };
+
+            const p1 = getCoord(v1, 0);   
+            const p2 = getCoord(v2, 72);  
+            const p3 = getCoord(v3, 144); 
+            const p4 = getCoord(v4, 216); 
+            const p5 = getCoord(v5, 288); 
+
+            const pointsString = `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y} ${p5.x},${p5.y}`;
+
+            document.getElementById('radar-polygon').setAttribute('points', pointsString);
+            document.getElementById('dot-1').setAttribute('cx', p1.x); document.getElementById('dot-1').setAttribute('cy', p1.y);
+            document.getElementById('dot-2').setAttribute('cx', p2.x); document.getElementById('dot-2').setAttribute('cy', p2.y);
+            document.getElementById('dot-3').setAttribute('cx', p3.x); document.getElementById('dot-3').setAttribute('cy', p3.y);
+            document.getElementById('dot-4').setAttribute('cx', p4.x); document.getElementById('dot-4').setAttribute('cy', p4.y);
+            document.getElementById('dot-5').setAttribute('cx', p5.x); document.getElementById('dot-5').setAttribute('cy', p5.y);
+        }
+    </script>
+</body>
+</html>
