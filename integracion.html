@@ -7,56 +7,61 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
-            --purple-glow: 0 0 12px rgba(186, 85, 211, 0.6), 0 0 24px rgba(160, 32, 240, 0.4);
-            --purple-border: #ba55d3;
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
         }
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: rgba(18, 16, 28, 0.92);
-            color: #f1f1f1;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
             margin: 0;
-            padding: 20px;
+            padding: 30px;
             box-sizing: border-box;
         }
 
-        .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
         
         .card { 
             display: flex;
             flex-direction: column;
             gap: 15px;
             width: 100%;
-            background: rgba(18, 16, 28, 0.88);
+            background: rgba(15, 76, 92, 0.85);
             backdrop-filter: blur(12px);
-            padding: 25px;
+            padding: 30px;
             border-radius: 14px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            border: 1px solid rgba(186, 85, 211, 0.3);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
             box-sizing: border-box;
         }
 
         h2 { 
-            color: #e2b7ff; 
-            font-size: 1.2rem; 
+            color: #ffffff; 
+            font-size: 1.25rem; 
             margin-top: 0; 
             display: flex; 
             align-items: center; 
-            gap: 8px; 
-            border-bottom: 1px solid rgba(186, 85, 211, 0.3); 
-            padding-bottom: 8px; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
         }
 
         .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px; }
         @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
 
-        .form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
-        label { font-size: 0.85rem; font-weight: 600; color: #d8b4fe; }
+        .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
         
         input, select, textarea { 
-            padding: 10px 12px; 
-            background: rgba(28, 25, 42, 0.8); 
-            border: 1px solid rgba(186, 85, 211, 0.3); 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
             border-radius: 8px; 
             font-size: 0.95rem; 
             color: #fff; 
@@ -65,42 +70,41 @@
         }
         
         input:focus, select:focus, textarea:focus { 
-            border-color: var(--purple-border); 
-            box-shadow: var(--purple-glow); 
+            border-color: var(--bordo); 
+            box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); 
         }
 
-        select option { background: #1c192a; color: #fff; }
+        select option { background: #083344; color: #fff; }
         textarea { width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box; }
 
         .score-preview-box {
-            background: rgba(186, 85, 211, 0.15);
-            border: 1px solid var(--purple-border);
-            padding: 15px;
+            background: rgba(8, 51, 68, 0.8);
+            border: 1px solid rgba(224, 242, 254, 0.2);
+            padding: 20px;
             border-radius: 10px;
             text-align: left;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
             line-height: 1.6;
         }
 
         /* Estilo Gráfico de Radar (SVG Nativo Integrado) */
         .radar-container {
             display: none;
-            background: rgba(15, 12, 22, 0.95);
-            border: 2px solid var(--purple-border);
+            background: rgba(4, 47, 46, 0.95);
+            border: 2px solid var(--bordo);
             border-radius: 12px;
             padding: 20px;
-            margin-top: 10px;
+            margin-top: 15px;
             box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
             text-align: center;
         }
 
         .radar-title {
-            color: #e2b7ff;
-            font-size: 0.9rem;
+            color: var(--cian-light);
+            font-size: 0.95rem;
             font-weight: bold;
             margin-bottom: 15px;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
         }
 
         .radar-svg-wrapper {
@@ -110,15 +114,16 @@
 
         .btn-container {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
+            margin-top: 10px;
         }
 
         .btn { 
-            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            background-color: var(--bordo); 
             color: white; 
             border: none; 
-            padding: 10px 18px; 
+            padding: 12px 20px; 
             border-radius: 8px; 
             cursor: pointer; 
             font-weight: 600; 
@@ -126,20 +131,22 @@
             display: inline-flex; 
             align-items: center; 
             justify-content: center; 
-            gap: 6px; 
-            box-shadow: 0 4px 10px rgba(160, 32, 240, 0.4);
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
             transition: all 0.3s ease;
         }
-        .btn:hover { transform: translateY(-2px); box-shadow: var(--purple-glow); }
-        .btn-secundario { background: linear-gradient(135deg, #2980b9, #2471a3); }
-        .btn-terciario { background: linear-gradient(135deg, #16a085, #117a65); }
-        .btn-export { background: linear-gradient(135deg, #d35400, #b9770e); }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+        .btn-secundario { background-color: #0e7490; }
+        .btn-secundario:hover { background-color: #155e75; }
+        .btn-terciario { background-color: #0f766e; }
+        .btn-terciario:hover { background-color: #115e59; }
+        .btn-export { background-color: #b45309; }
+        .btn-export:hover { background-color: #92400e; }
 
-        .eval-card { background: rgba(28, 25, 42, 0.7); border-left: 4px solid var(--purple-border); padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(186, 85, 211, 0.2); text-align: left; }
-        .eval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(186, 85, 211, 0.2); padding-bottom: 6px; }
+        .eval-card { background: rgba(8, 51, 68, 0.6); border-left: 4px solid var(--bordo); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
+        .eval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(224, 242, 254, 0.2); padding-bottom: 8px; }
     </style>
 
-    <!-- SDKs de Firebase Compat alineados -->
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 </head>
@@ -184,33 +191,33 @@
                     <div class="radar-svg-wrapper">
                         <svg viewBox="0 0 400 400" width="100%" height="100%">
                             <!-- Fondo y Red Concéntrica Pentagonal -->
-                            <polygon points="200,40 352,151 294,330 106,330 48,151" fill="none" stroke="#4a3b60" stroke-width="1" />
-                            <polygon points="200,85 293,153 257,267 143,267 107,153" fill="none" stroke="#4a3b60" stroke-width="1" stroke-dasharray="4" />
-                            <polygon points="200,130 234,155 220,205 180,205 166,155" fill="none" stroke="#4a3b60" stroke-width="1" />
+                            <polygon points="200,40 352,151 294,330 106,330 48,151" fill="none" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                            <polygon points="200,85 293,153 257,267 143,267 107,153" fill="none" stroke="#22d3ee" stroke-width="1" stroke-dasharray="4" stroke-opacity="0.3" />
+                            <polygon points="200,130 234,155 220,205 180,205 166,155" fill="none" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
                             
                             <!-- Ejes Centrales -->
-                            <line x1="200" y1="200" x2="200" y2="40" stroke="#4a3b60" stroke-width="1" />
-                            <line x1="200" y1="200" x2="352" y2="151" stroke="#4a3b60" stroke-width="1" />
-                            <line x1="200" y1="200" x2="294" y2="330" stroke="#4a3b60" stroke-width="1" />
-                            <line x1="200" y1="200" x2="106" y2="330" stroke="#4a3b60" stroke-width="1" />
-                            <line x1="200" y1="200" x2="48" y2="151" stroke="#4a3b60" stroke-width="1" />
+                            <line x1="200" y1="200" x2="200" y2="40" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                            <line x1="200" y1="200" x2="352" y2="151" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                            <line x1="200" y1="200" x2="294" y2="330" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                            <line x1="200" y1="200" x2="106" y2="330" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
+                            <line x1="200" y1="200" x2="48" y2="151" stroke="#22d3ee" stroke-width="1" stroke-opacity="0.3" />
 
                             <!-- Polígono Dinámico de Resultados del Paciente -->
-                            <polygon id="radar-polygon" points="200,200 200,200 200,200 200,200 200,200" fill="rgba(186, 85, 211, 0.4)" stroke="#ba55d3" stroke-width="2" />
+                            <polygon id="radar-polygon" points="200,200 200,200 200,200 200,200 200,200" fill="rgba(136, 19, 55, 0.4)" stroke="#881337" stroke-width="2" />
 
                             <!-- Puntos de los Vértices -->
-                            <circle id="dot-1" cx="200" cy="200" r="4" fill="#e2b7ff" />
-                            <circle id="dot-2" cx="200" cy="200" r="4" fill="#e2b7ff" />
-                            <circle id="dot-3" cx="200" cy="200" r="4" fill="#e2b7ff" />
-                            <circle id="dot-4" cx="200" cy="200" r="4" fill="#e2b7ff" />
-                            <circle id="dot-5" cx="200" cy="200" r="4" fill="#e2b7ff" />
+                            <circle id="dot-1" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                            <circle id="dot-2" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                            <circle id="dot-3" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                            <circle id="dot-4" cx="200" cy="200" r="4" fill="#e0f2fe" />
+                            <circle id="dot-5" cx="200" cy="200" r="4" fill="#e0f2fe" />
 
                             <!-- Etiquetas de los 5 Ejes -->
-                            <text x="200" y="25" fill="#d8b4fe" font-size="11" text-anchor="middle">Autenticidad</text>
-                            <text x="365" y="150" fill="#d8b4fe" font-size="11" text-anchor="start">Urgencia / Sentido</text>
-                            <text x="310" y="355" fill="#d8b4fe" font-size="11" text-anchor="start">Viabilidad</text>
-                            <text x="90" y="355" fill="#d8b4fe" font-size="11" text-anchor="end">Cuestionario Vital</text>
-                            <text x="35" y="150" fill="#d8b4fe" font-size="11" text-anchor="end">Maslow</text>
+                            <text x="200" y="25" fill="#e0f2fe" font-size="11" text-anchor="middle">Autenticidad</text>
+                            <text x="365" y="150" fill="#e0f2fe" font-size="11" text-anchor="start">Urgencia / Sentido</text>
+                            <text x="310" y="355" fill="#e0f2fe" font-size="11" text-anchor="start">Viabilidad</text>
+                            <text x="90" y="355" fill="#e0f2fe" font-size="11" text-anchor="end">Cuestionario Vital</text>
+                            <text x="35" y="150" fill="#e0f2fe" font-size="11" text-anchor="end">Maslow</text>
                         </svg>
                     </div>
                 </div>
@@ -229,7 +236,7 @@
         <div id="evaluations-history-card" class="card" style="display: none;">
             <h2><i class="fa-solid fa-timeline"></i> Historial de Informes de Matriz General y Planes de Vida</h2>
             <div id="evaluations-container">
-                <p style="color: #b19cd9; font-size: 0.9rem; text-align: center; padding: 15px;">Seleccione un paciente para ver sus matrices previas.</p>
+                <p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 15px;">Seleccione un paciente para ver sus matrices previas.</p>
             </div>
         </div>
     </main>
@@ -240,19 +247,13 @@
         let patientDataCache = null;
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (typeof firebase === 'undefined') {
-                alert("Error crítico: Firebase no está disponible.");
-                return;
-            }
-
             const firebaseConfig = {
-                apiKey: "AIzaSyAd5dyriu-Z2Gms1Tq9u8A75LrQKHd0GC8",
-                authDomain: "aplicacion1-c794d.firebaseapp.com",
-                projectId: "aplicacion1-c794d",
-                storageBucket: "aplicacion1-c794d.firebasestorage.app",
-                messagingSenderId: "310699962592",
-                appId: "1:310699962592:web:71794de4268e47b35da085",
-                measurementId: "G-R3QHSGSNQB"
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
             };
 
             if (!firebase.apps.length) {
@@ -371,7 +372,7 @@
 
             preview.innerHTML = `
                 <strong>Informe de Matriz General Consolidado:</strong><br><br>
-                <strong>Índice de Madurez Proyectiva:</strong> <span style="color: #ba55d3; font-weight: bold;">${res.perfilClinico}</span><br><br>
+                <strong>Índice de Madurez Proyectiva:</strong> <span style="color: var(--cian-light); font-weight: bold;">${res.perfilClinico}</span><br><br>
                 <strong>Puntajes Históricos de Referencia:</strong><br>
                 - Mapa de Autenticidad: ${res.scores.autenticidad}/9<br>
                 - Urgencia y Sentido: ${res.scores.urgencia}/9<br>
@@ -423,17 +424,32 @@
             document.getElementById('radar-box').style.display = 'block';
         }
 
-        // Nueva función de exportación de datos completos del paciente
+        // Exportación integral de absolutamente todos los datos de la aplicación y la BD actual y anterior del paciente
         window.exportarDatosPaciente = function() {
             if (!patientDataCache) {
                 alert("No hay datos de paciente cargados para exportar.");
                 return;
             }
 
-            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(patientDataCache, null, 2));
+            const expedienteCompleto = {
+                paciente_id: activePatientId,
+                fecha_exportacion: new Date().toISOString(),
+                datos_generales: patientDataCache,
+                historial_evaluaciones: {
+                    autenticidad: patientDataCache.evaluaciones_autenticidad || [],
+                    urgencia_y_sentido: patientDataCache.evaluaciones_urgencia_sentido || [],
+                    viabilidad_pragmatica: patientDataCache.evaluaciones_viabilidad_pragmatica || [],
+                    validacion_empatica: patientDataCache.evaluaciones_validacion || [],
+                    cuestionario_vital: patientDataCache.evaluaciones_cuestionario_vital || [],
+                    piramide_maslow: patientDataCache.evaluaciones_maslow || []
+                },
+                matrices_generales: patientDataCache.matrices_generales || []
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(expedienteCompleto, null, 2));
             const downloadAnchor = document.createElement('a');
             downloadAnchor.setAttribute("href", dataStr);
-            downloadAnchor.setAttribute("download", `expediente_paciente_${activePatientId}.json`);
+            downloadAnchor.setAttribute("download", `expediente_integral_paciente_${activePatientId}.json`);
             document.body.appendChild(downloadAnchor);
             downloadAnchor.click();
             downloadAnchor.remove();
@@ -481,7 +497,7 @@
 
         async function renderEvaluations() {
             const container = document.getElementById('evaluations-container');
-            container.innerHTML = '<p style="color: #c084fc; font-size: 0.9rem; text-align: center;">Cargando matrices previas...</p>';
+            container.innerHTML = '<p style="color: var(--cian-light); font-size: 0.9rem; text-align: center;">Cargando matrices previas...</p>';
 
             try {
                 if (!patientDataCache) return;
@@ -489,7 +505,7 @@
                 
                 container.innerHTML = '';
                 if (matrices.length === 0) {
-                    container.innerHTML = '<p style="color: #b19cd9; font-size: 0.9rem; text-align: center; padding: 15px;">No hay matrices generales registradas para este paciente.</p>';
+                    container.innerHTML = '<p style="color: var(--text-muted); font-size: 0.9rem; text-align: center; padding: 15px;">No hay matrices generales registradas para este paciente.</p>';
                     return;
                 }
 
@@ -500,12 +516,12 @@
                     div.className = 'eval-card';
                     div.innerHTML = `
                         <div class="eval-header">
-                            <strong style="color: #e2b7ff;"><i class="fa-solid fa-chart-pie"></i> Matriz General (Radar) - Índice Global: ${mat.promedio}%</strong>
-                            <span style="font-size: 0.8rem; color: #d8b4fe;">Fecha: ${mat.fecha}</span>
+                            <strong style="color: #ffffff;"><i class="fa-solid fa-chart-pie"></i> Matriz General (Radar) - Índice Global: ${mat.promedio}%</strong>
+                            <span style="font-size: 0.8rem; color: var(--cian-light);">Fecha: ${mat.fecha}</span>
                         </div>
-                        <p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Perfil Clínico:</strong> <span style="color: #2ecc71; font-weight: bold;">${mat.perfil}</span></p>
+                        <p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Perfil Clínico:</strong> <span style="color: #22d3ee; font-weight: bold;">${mat.perfil}</span></p>
                         <p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Pautas Orientativas para el Plan de Vida:</strong><br>${mat.pautasPlanVida}</p>
-                        <p style="font-size: 0.9rem; color: #e5e5e5; white-space: pre-line;"><strong>Notas:</strong> ${mat.observaciones}</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted); white-space: pre-line;"><strong>Notas:</strong> ${mat.observaciones}</p>
                     `;
                     container.appendChild(div);
                 });
