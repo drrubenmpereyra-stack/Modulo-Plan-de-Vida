@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Mapa de Autenticidad</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        input, select, textarea { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--bordo); 
+            box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); 
+        }
+
+        textarea { width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box; }
+
+        .rubric-criterion-box {
+            background: rgba(8, 51, 68, 0.5);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .rubric-criterion-box h4 {
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .radio-group label {
+            font-weight: normal;
+            color: var(--text-muted);
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            cursor: pointer;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+
+        .radio-group label:hover {
+            background-color: rgba(136, 19, 55, 0.2);
+            color: #fff;
+        }
+
+        .radio-group input {
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 14px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 1rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+
+        .patient-info-box {
+            background: rgba(8, 51, 68, 0.7);
+            border-left: 4px solid var(--bordo);
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--cian-light);
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <div class="card">
+            <h2><i class="fa-solid fa-user-circle"></i> Datos del Paciente</h2>
+            <div class="patient-info-box" id="patient-display-box">
+                Cargando datos del paciente conectado...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-compass"></i> Mapa de Autenticidad y Tendencia Actualizante</h2>
+            <form id="autenticidadForm" onsubmit="event.preventDefault(); guardarInformeEnBD();">
+                <div class="form-grid" style="margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="eval-date">Fecha de Evaluación</label>
+                        <input type="date" id="eval-date" required>
+                    </div>
+                </div>
+
+                <!-- Criterio 1 -->
+                <div class="rubric-criterion-box">
+                    <h4>Criterio 1: Grado de Congruencia vs. Introyectos (Falso Self)[cite: 2]</h4>
+                    <div class="radio-group">
+                        <label><input type="radio" name="crit1" value="1" required> <strong>Nivel 1 (1 pt):</strong> Las elecciones vitales están subordinadas por completo a la expectativa ajena[cite: 2].</label>
+                        <label><input type="radio" name="crit1" value="2"> <strong>Nivel 2 (2 pts):</strong> El sujeto percibe que la vida que lleva no lo representa, pero experimenta culpa o parálisis ante el cambio[cite: 2].</label>
+                        <label><input type="radio" name="crit1" value="3"> <strong>Nivel 3 (3 pts):</strong> Alta correspondencia entre los valores internos y las acciones cotidianas[cite: 2].</label>
+                    </div>
+                </div>
+
+                <!-- Criterio 2 -->
+                <div class="rubric-criterion-box">
+                    <h4>Criterio 2: Registro Somático y Conciencia Emocional[cite: 2]</h4>
+                    <div class="radio-group">
+                        <label><input type="radio" name="crit2" value="1" required> <strong>Nivel 1 (1 pt):</strong> Desconexión somática profunda y alexitimia; el sujeto no logra reconocer qué le agrada o disgusta[cite: 2].</label>
+                        <label><input type="radio" name="crit2" value="2"> <strong>Nivel 2 (2 pts):</strong> Percibe la discrepancia y el malestar interno, mas carece de validación suficiente[cite: 2].</label>
+                        <label><input type="radio" name="crit2" value="3"> <strong>Nivel 3 (3 pts):</strong> Integración somática fluida y reconocimiento claro de las respuestas internas[cite: 2].</label>
+                    </div>
+                </div>
+
+                <!-- Criterio 3 -->
+                <div class="rubric-criterion-box">
+                    <h4>Criterio 3: Autoría Vital y Capacidad de Acción[cite: 2]</h4>
+                    <div class="radio-group">
+                        <label><input type="radio" name="crit3" value="1" required> <strong>Nivel 1 (1 pt):</strong> Parálisis total ante el proyecto vital; la prioridad clínica es la deconstrucción de mandatos[cite: 2].</label>
+                        <label><input type="radio" name="crit3" value="2"> <strong>Nivel 2 (2 pts):</strong> Experimenta ambivalencia requiriendo micro-ensayos de diferenciación en espacios seguros[cite: 2].</label>
+                        <label><input type="radio" name="crit3" value="3"> <strong>Nivel 3 (3 pts):</strong> Tolera la incertidumbre y experimenta motivación intrínseca orientada al crecimiento[cite: 2].</label>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label for="eval-observaciones">Observaciones Clínicas / Notas del Paciente</label>
+                    <textarea id="eval-observaciones" placeholder="Detalle contextual o reflexiones sobre su autenticidad..."></textarea>
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Guardar Respuestas del Cuestionario</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let activePatientDocId = null;
+        let activePatientName = "";
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            document.getElementById('eval-date').valueAsDate = new Date();
+            await identificarPacienteConectado();
+        });
+
+        async function identificarPacienteConectado() {
+            const userName = sessionStorage.getItem('userName');
+            const userRole = sessionStorage.getItem('userRole');
+            const displayBox = document.getElementById('patient-display-box');
+
+            if (!userName) {
+                displayBox.innerHTML = "No hay una sesión activa detectada. Ingrese desde el login.";
+                return;
+            }
+
+            if (userRole === 'admin') {
+                displayBox.innerHTML = `<strong>Modo Administrador:</strong> Visualizando como panel general.`;
+                return;
+            }
+
+            try {
+                const querySnapshot = await db.collection("pacientes").get();
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.nombre && data.nombre.toLowerCase().includes(userName.toLowerCase())) {
+                        activePatientDocId = docSnap.id;
+                        activePatientName = data.nombre;
+                    }
+                });
+
+                if (activePatientDocId) {
+                    displayBox.innerHTML = `<strong>Paciente Conectado:</strong> ${activePatientName}`;
+                } else {
+                    displayBox.innerHTML = `<strong>Paciente:</strong> ${userName}`;
+                }
+            } catch (error) {
+                displayBox.innerHTML = `<strong>Paciente:</strong> ${userName}`;
+            }
+        }
+
+        window.guardarInformeEnBD = async function() {
+            const r1 = document.querySelector('input[name="crit1"]:checked');
+            const r2 = document.querySelector('input[name="crit2"]:checked');
+            const r3 = document.querySelector('input[name="crit3"]:checked');
+
+            if (!r1 || !r2 || !r3) {
+                alert("Por favor responda todos los criterios antes de guardar.");
+                return;
+            }
+
+            const c1 = parseInt(r1.value);
+            const c2 = parseInt(r2.value);
+            const c3 = parseInt(r3.value);
+            const total = c1 + c2 + c3;
+
+            let categoriaStr = "";
+            let indicadoresClinicos = "";
+            let implicanciaProyecto = "";
+
+            if (total >= 8) {
+                categoriaStr = "Categoría A - Congruencia y Fluidez Actualizante (8-9 pts)";
+                indicadoresClinicos = "Alta correspondencia entre valores internos y acciones[cite: 2].";
+                implicanciaProyecto = "El proyecto opera como un plan de expansión y co-creación de sentido[cite: 2].";
+            } else if (total >= 5) {
+                categoriaStr = "Categoría B - Ambivalencia y Transición (5-7 pts)";
+                indicadoresClinicos = "Percepción clara de discrepancia limitada por culpa o parálisis[cite: 2].";
+                implicanciaProyecto = "Construcción mediante micro-ensayos de diferenciación en espacios seguros[cite: 2].";
+            } else {
+                categoriaStr = "Categoría C - Alienación Profunda (3-4 pts)";
+                indicadoresClinicos = "Subordinación total a mandatos con desconexión somática[cite: 2].";
+                implicanciaProyecto = "Prioridad clínica en la deconstrucción de mandatos y escucha interna[cite: 2].";
+            }
+
+            const nuevaEvaluacion = {
+                id: Date.now().toString(),
+                fecha: document.getElementById('eval-date').value,
+                crit1: c1,
+                crit2: c2,
+                crit3: c3,
+                puntaje: total,
+                categoria: categoriaStr,
+                indicadoresClinicos: indicadoresClinicos,
+                implicanciaProyecto: implicanciaProyecto,
+                observaciones: document.getElementById('eval-observaciones').value.trim()
+            };
+
+            try {
+                if (activePatientDocId) {
+                    const patientRef = db.collection("pacientes").doc(activePatientDocId);
+                    const patientSnap = await patientRef.get();
+                    let evaluaciones = patientSnap.data().evaluaciones_autenticidad || [];
+                    evaluaciones.push(nuevaEvaluacion);
+
+                    await patientRef.update({ evaluaciones_autenticidad: evaluaciones });
+                    alert('¡Respuestas de Mapa de Autenticidad guardadas con éxito!');
+                } else {
+                    await db.collection("evaluaciones_autenticidad_generales").add({
+                        usuario: sessionStorage.getItem('userName') || 'Desconocido',
+                        ...nuevaEvaluacion
+                    });
+                    alert('¡Cuestionario guardado con éxito!');
+                }
+                document.getElementById('autenticidadForm').reset();
+                document.getElementById('eval-date').valueAsDate = new Date();
+            } catch (error) {
+                alert("Error al registrar las respuestas en la base de datos.");
+            }
+        };
+    </script>
+</body>
+</html>

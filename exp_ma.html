@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Exploración: Mapa de Autenticidad</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-group { display: flex; flex-direction: column; gap: 8px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        select { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.8); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        
+        select:focus { 
+            border-color: var(--bordo); 
+            box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); 
+        }
+
+        select option { background: #083344; color: #fff; }
+
+        .question-card {
+            background: rgba(8, 51, 68, 0.5);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .question-title {
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .respuesta-badge {
+            display: inline-block;
+            background: rgba(136, 19, 55, 0.4);
+            border: 1px solid var(--bordo);
+            padding: 6px 12px;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Consola de Semáforo */
+        .semaforo-container {
+            display: none;
+            background: rgba(4, 47, 46, 0.95);
+            border: 2px solid var(--bordo);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 15px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        .semaforo-title {
+            color: var(--cian-light);
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+        }
+
+        .semaforo-lights-row {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            flex-wrap: wrap;
+        }
+
+        .luz-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .luz-label {
+            font-size: 0.8rem;
+            color: var(--cian-light);
+        }
+
+        .luz-bulbo {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: #062835;
+            border: 2px solid rgba(255,255,255,0.2);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.6);
+            transition: all 0.4s ease;
+        }
+
+        .luz-bulbo.rojo-activo {
+            background: #ef4444;
+            border-color: #fca5a5;
+            box-shadow: 0 0 15px #ef4444, 0 0 25px #dc2626;
+        }
+
+        .luz-bulbo.amarillo-activo {
+            background: #f59e0b;
+            border-color: #fde68a;
+            box-shadow: 0 0 15px #f59e0b, 0 0 25px #d97706;
+        }
+
+        .luz-bulbo.verde-activo {
+            background: #10b981;
+            border-color: #a7f3d0;
+            box-shadow: 0 0 15px #10b981, 0 0 25px #059669;
+        }
+
+        .score-preview-box {
+            background: rgba(8, 51, 68, 0.8);
+            border: 1px solid rgba(224, 242, 254, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 12px 20px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+        .btn-secundario { background-color: #0e7490; }
+        .btn-secundario:hover { background-color: #155e75; }
+        .btn-terciario { background-color: #0f766e; }
+        .btn-terciario:hover { background-color: #115e59; }
+
+        .eval-card { background: rgba(8, 51, 68, 0.6); border-left: 4px solid var(--bordo); padding: 15px; border-radius: 8px; margin-top: 15px; text-align: left; }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <!-- Buscador de Pacientes -->
+        <div class="card">
+            <h2><i class="fa-solid fa-magnifying-glass"></i> Buscador de Pacientes (Mapa de Autenticidad)</h2>
+            <div class="form-group">
+                <label for="eval-patient">Seleccionar Paciente Registrado</label>
+                <select id="eval-patient" onchange="cargarEvaluacionesPaciente()">
+                    <option value="">-- Seleccione un paciente --</option>
+                </select>
+            </div>
+            <div class="form-group" id="eval-selector-group" style="display: none; margin-top: 10px;">
+                <label for="eval-select">Seleccionar Fecha de Evaluación Guardada</label>
+                <select id="eval-select" onchange="mostrarEvaluacionSeleccionada()">
+                    <option value="">-- Seleccione una evaluación --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tarjeta de Análisis -->
+        <div id="eval-analysis-card" class="card" style="display: none;">
+            <h2><i class="fa-solid fa-compass"></i> Análisis Clínico: Mapa de Autenticidad</h2>
+            
+            <div id="respuestas-container">
+                <!-- Se inyectan las respuestas -->
+            </div>
+
+            <div class="btn-container">
+                <button type="button" class="btn btn-secundario" onclick="valorarPuntaje()"><i class="fa-solid fa-calculator"></i> Valorar Puntaje</button>
+                <button type="button" class="btn btn-terciario" onclick="obtenerGrafico()"><i class="fa-solid fa-lightbulb"></i> Obtener Gráfico</button>
+                <button type="button" class="btn" onclick="generarYGuardarInforme()"><i class="fa-solid fa-floppy-disk"></i> Generar informe y guardar en base de datos</button>
+            </div>
+
+            <!-- Gráfico de Semáforo -->
+            <div id="semaforo-box" class="semaforo-container">
+                <div class="semaforo-title"><i class="fa-solid fa-gauge-high"></i> Consola de Indicadores (Semáforo)</div>
+                <div class="semaforo-lights-row">
+                    <div class="luz-item">
+                        <span class="luz-label">Criterio 1</span>
+                        <div id="bulbo-c1" class="luz-bulbo"></div>
+                    </div>
+                    <div class="luz-item">
+                        <span class="luz-label">Criterio 2</span>
+                        <div id="bulbo-c2" class="luz-bulbo"></div>
+                    </div>
+                    <div class="luz-item">
+                        <span class="luz-label">Criterio 3</span>
+                        <div id="bulbo-c3" class="luz-bulbo"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Caja de Informe -->
+            <div class="score-preview-box" id="score-preview" style="display: none; margin-top: 15px;">
+                <strong>Informe de Valoración:</strong><br>
+                <span id="score-content">Realice la valoración para ver los resultados...</span>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let activePatientId = null;
+        let evaluacionesCache = [];
+        let evaluacionActual = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            initPacientes();
+        });
+
+        async function initPacientes() {
+            try {
+                const querySnapshot = await db.collection("pacientes").get();
+                const selectEl = document.getElementById('eval-patient');
+                selectEl.innerHTML = '<option value="">-- Seleccione un paciente --</option>';
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const opt = document.createElement('option');
+                    opt.value = docSnap.id;
+                    opt.textContent = data.nombre || `Paciente (${docSnap.id})`;
+                    selectEl.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Error al cargar pacientes:", error);
+            }
+        }
+
+        window.cargarEvaluacionesPaciente = async function() {
+            activePatientId = document.getElementById('eval-patient').value;
+            const evalSelectorGroup = document.getElementById('eval-selector-group');
+            const evalSelect = document.getElementById('eval-select');
+            const analysisCard = document.getElementById('eval-analysis-card');
+
+            analysisCard.style.display = 'none';
+            evalSelectorGroup.style.display = 'none';
+            evaluacionesCache = [];
+            evaluacionActual = null;
+
+            if (!activePatientId) return;
+
+            try {
+                const patientDoc = await db.collection("pacientes").doc(activePatientId).get();
+                if (patientDoc.exists) {
+                    const data = patientDoc.data();
+                    evaluacionesCache = data.evaluaciones_autenticidad || [];
+
+                    if (evaluacionesCache.length > 0) {
+                        evalSelect.innerHTML = '<option value="">-- Seleccione una evaluación --</option>';
+                        evaluacionesCache.forEach((ev, index) => {
+                            const opt = document.createElement('option');
+                            opt.value = index;
+                            opt.textContent = `Evaluación del ${ev.fecha} (Puntaje: ${ev.puntaje}/9)`;
+                            evalSelect.appendChild(opt);
+                        });
+                        evalSelectorGroup.style.display = 'flex';
+                    } else {
+                        alert("Este paciente no tiene evaluaciones de autenticidad registradas.");
+                    }
+                }
+            } catch (error) {
+                console.error("Error al obtener evaluaciones:", error);
+            }
+        }
+
+        window.mostrarEvaluacionSeleccionada = function() {
+            const index = document.getElementById('eval-select').value;
+            const analysisCard = document.getElementById('eval-analysis-card');
+
+            if (index === "") {
+                analysisCard.style.display = 'none';
+                return;
+            }
+
+            evaluacionActual = evaluacionesCache[index];
+            analysisCard.style.display = 'flex';
+
+            const respCont = document.getElementById('respuestas-container');
+            
+            respCont.innerHTML = `
+                <div style="font-size: 0.85rem; color: var(--cian-light); margin-bottom: 10px;">Fecha de registro: <strong>${evaluacionActual.fecha}</strong></div>
+                <div class="question-card">
+                    <div class="question-title">Criterio 1: Grado de Congruencia vs. Introyectos[cite: 2]</div>
+                    <div class="respuesta-badge">Nivel seleccionado: ${evaluacionActual.crit1}</div>
+                </div>
+                <div class="question-card">
+                    <div class="question-title">Criterio 2: Registro Somático y Conciencia Emocional[cite: 2]</div>
+                    <div class="respuesta-badge">Nivel seleccionado: ${evaluacionActual.crit2}</div>
+                </div>
+                <div class="question-card">
+                    <div class="question-title">Criterio 3: Autoría Vital y Capacidad de Acción[cite: 2]</div>
+                    <div class="respuesta-badge">Nivel seleccionado: ${evaluacionActual.crit3}</div>
+                </div>
+                ${evaluacionActual.observaciones ? `<div class="eval-card"><strong>Observaciones guardadas:</strong> ${evaluacionActual.observaciones}</div>` : ''}
+            `;
+
+            document.getElementById('score-preview').style.display = 'none';
+            document.getElementById('semaforo-box').style.display = 'none';
+        }
+
+        window.valorarPuntaje = function() {
+            if (!evaluacionActual) return;
+
+            const preview = document.getElementById('score-preview');
+            const content = document.getElementById('score-content');
+            preview.style.display = 'block';
+
+            let colorCat = "#10b981";
+            if (evaluacionActual.puntaje < 8 && evaluacionActual.puntaje >= 5) colorCat = "#f59e0b";
+            if (evaluacionActual.puntaje < 5) colorCat = "#ef4444";
+
+            content.innerHTML = `
+                <strong>Puntaje Total:</strong> ${evaluacionActual.puntaje}/9<br>
+                <strong>Categoría:</strong> <span style="color: ${colorCat}; font-weight: bold;">${evaluacionActual.categoria}</span><br><br>
+                <strong>Indicadores Clínicos:</strong><br>
+                ${evaluacionActual.indicadoresClinicos || 'Sin datos.'}<br><br>
+                <strong>Implicancia para el Proyecto:</strong><br>
+                <em>${evaluacionActual.implicanciaProyecto || 'Sin datos.'}</em>
+            `;
+        }
+
+        window.obtenerGrafico = function() {
+            if (!evaluacionActual) return;
+
+            const b1 = document.getElementById('bulbo-c1');
+            const b2 = document.getElementById('bulbo-c2');
+            const b3 = document.getElementById('bulbo-c3');
+
+            b1.className = "luz-bulbo";
+            b2.className = "luz-bulbo";
+            b3.className = "luz-bulbo";
+
+            const asignarLuz = (bulbo, val) => {
+                if (val === 1) bulbo.classList.add("rojo-activo");
+                else if (val === 2) bulbo.classList.add("amarillo-activo");
+                else if (val === 3) bulbo.classList.add("verde-activo");
+            };
+
+            asignarLuz(b1, evaluacionActual.crit1);
+            asignarLuz(b2, evaluacionActual.crit2);
+            asignarLuz(b3, evaluacionActual.crit3);
+
+            document.getElementById('semaforo-box').style.display = 'block';
+        }
+
+        window.generarYGuardarInforme = async function() {
+            if (!evaluacionActual || !activePatientId) return;
+
+            valorarPuntaje();
+            obtenerGrafico();
+
+            try {
+                const patientRef = db.collection("pacientes").doc(activePatientId);
+                const patientSnap = await patientRef.get();
+                
+                if (patientSnap.exists) {
+                    let evaluaciones = patientSnap.data().evaluaciones_autenticidad || [];
+                    const index = evaluaciones.findIndex(e => e.id === evaluacionActual.id);
+                    if (index !== -1) {
+                        evaluaciones[index].informe_generado = true;
+                        evaluaciones[index].ultima_actualizacion = new Date().toISOString();
+                    }
+
+                    await patientRef.update({ evaluaciones_autenticidad: evaluaciones });
+                    alert('¡Informe consolidado de autenticidad guardado correctamente en la base de datos!');
+                }
+            } catch (error) {
+                alert("Error al actualizar la base de datos.");
+            }
+        }
+    </script>
+</body>
+</html>
