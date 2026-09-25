@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Matriz General y Exportación Integral</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --purple-glow: 0 0 12px rgba(186, 85, 211, 0.6), 0 0 24px rgba(160, 32, 240, 0.4);
+            --purple-border: #ba55d3;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: rgba(18, 16, 28, 0.92);
+            color: #f1f1f1;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(18, 16, 28, 0.88);
+            backdrop-filter: blur(12px);
+            padding: 25px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(186, 85, 211, 0.3);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #e2b7ff; 
+            font-size: 1.2rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            border-bottom: 1px solid rgba(186, 85, 211, 0.3); 
+            padding-bottom: 8px; 
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+        label { font-size: 0.85rem; font-weight: 600; color: #d8b4fe; }
+        
+        input, select, textarea { 
+            padding: 10px 12px; 
+            background: rgba(28, 25, 42, 0.8); 
+            border: 1px solid rgba(186, 85, 211, 0.3); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--purple-border); 
+            box-shadow: var(--purple-glow); 
+        }
+
+        select option { background: #1c192a; color: #fff; }
+        textarea { width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box; }
+
+        .score-preview-box {
+            background: rgba(186, 85, 211, 0.15);
+            border: 1px solid var(--purple-border);
+            padding: 15px;
+            border-radius: 10px;
+            text-align: left;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        /* Estilo Gráfico de Radar (SVG Nativo Integrado) */
+        .radar-container {
+            display: none;
+            background: rgba(15, 12, 22, 0.95);
+            border: 2px solid var(--purple-border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 10px;
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.8);
+            text-align: center;
+        }
+
+        .radar-title {
+            color: #e2b7ff;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .radar-svg-wrapper {
+            max-width: 450px;
+            margin: 0 auto;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .btn { 
+            background: linear-gradient(135deg, #9b59b6, #8e44ad); 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 0.9rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 6px; 
+            box-shadow: 0 4px 10px rgba(160, 32, 240, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: var(--purple-glow); }
+        .btn-secundario { background: linear-gradient(135deg, #2980b9, #2471a3); }
+        .btn-terciario { background: linear-gradient(135deg, #16a085, #117a65); }
+        .btn-export { background: linear-gradient(135deg, #d35400, #b9770e); }
+
+        .eval-card { background: rgba(28, 25, 42, 0.7); border-left: 4px solid var(--purple-border); padding: 15px; border-radius: 8px; margin-bottom: 12px; border: 1px solid rgba(186, 85, 211, 0.2); text-align: left; }
+        .eval-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; border-bottom: 1px solid rgba(186, 85, 211, 0.2); padding-bottom: 6px; }
+    </style>
+
+    <!-- SDKs de Firebase Compat alineados -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <!-- Tarjeta de Selección de Paciente -->
+        <div class="card">
+            <h2><i class="fa-solid fa-user-shield"></i> Selección de Paciente</h2>
+            <div class="form-group">
+                <label for="eval-patient">Paciente Activo</label>
+                <select id="eval-patient" onchange="loadPatientEvaluations()">
+                    <option value="">-- Seleccione un paciente --</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Tarjeta Principal de la Matriz General -->
+        <div id="eval-form-card" class="card" style="display: none;">
+            <h2><i class="fa-solid fa-chart-pie"></i> Matriz General de Síntesis e Integralidad Proyectiva (Gráfico de Radar)</h2>
+            <form id="matrixForm" onsubmit="event.preventDefault();">
+                <div class="form-grid" style="margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="form-date">Fecha de Consolidación</label>
+                        <input type="date" id="form-date" required>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label for="eval-observaciones">Notas de Síntesis Clínica Global</label>
+                    <textarea id="eval-observaciones" placeholder="Análisis transversal de los datos históricos del paciente..."></textarea>
+                </div>
+
+                <div class="score-preview-box" id="score-preview">
+                    <strong>Informe de Matriz General y Plan de Vida:</strong><br>
+                    Seleccione un paciente para recopilar automáticamente las evaluaciones previas de la base de datos y trazar las pautas prospectivas.
+                </div>
+
+                <!-- Gráfico de Radar (SVG Pentagonal de 5 Ejes) -->
+                <div id="radar-box" class="radar-container">
+                    <div class="radar-title"><i class="fa-solid fa-spider"></i> Gráfico de Radar Multidimensional[cite: 7]</div>
+                    <div class="radar-svg-wrapper">
+                        <svg viewBox="0 0 400 400" width="100%" height="100%">
+                            <!-- Fondo y Red Concéntrica Pentagonal -->
+                            <polygon points="200,40 352,151 294,330 106,330 48,151" fill="none" stroke="#4a3b60" stroke-width="1" />
+                            <polygon points="200,85 293,153 257,267 143,267 107,153" fill="none" stroke="#4a3b60" stroke-width="1" stroke-dasharray="4" />
+                            <polygon points="200,130 234,155 220,205 180,205 166,155" fill="none" stroke="#4a3b60" stroke-width="1" />
+                            
+                            <!-- Ejes Centrales -->
+                            <line x1="200" y1="200" x2="200" y2="40" stroke="#4a3b60" stroke-width="1" />
+                            <line x1="200" y1="200" x2="352" y2="151" stroke="#4a3b60" stroke-width="1" />
+                            <line x1="200" y1="200" x2="294" y2="330" stroke="#4a3b60" stroke-width="1" />
+                            <line x1="200" y1="200" x2="106" y2="330" stroke="#4a3b60" stroke-width="1" />
+                            <line x1="200" y1="200" x2="48" y2="151" stroke="#4a3b60" stroke-width="1" />
+
+                            <!-- Polígono Dinámico de Resultados del Paciente -->
+                            <polygon id="radar-polygon" points="200,200 200,200 200,200 200,200 200,200" fill="rgba(186, 85, 211, 0.4)" stroke="#ba55d3" stroke-width="2" />
+
+                            <!-- Puntos de los Vértices -->
+                            <circle id="dot-1" cx="200" cy="200" r="4" fill="#e2b7ff" />
+                            <circle id="dot-2" cx="200" cy="200" r="4" fill="#e2b7ff" />
+                            <circle id="dot-3" cx="200" cy="200" r="4" fill="#e2b7ff" />
+                            <circle id="dot-4" cx="200" cy="200" r="4" fill="#e2b7ff" />
+                            <circle id="dot-5" cx="200" cy="200" r="4" fill="#e2b7ff" />
+
+                            <!-- Etiquetas de los 5 Ejes -->
+                            <text x="200" y="25" fill="#d8b4fe" font-size="11" text-anchor="middle">Autenticidad</text>
+                            <text x="365" y="150" fill="#d8b4fe" font-size="11" text-anchor="start">Urgencia / Sentido</text>
+                            <text x="310" y="355" fill="#d8b4fe" font-size="11" text-anchor="start">Viabilidad</text>
+                            <text x="90" y="355" fill="#d8b4fe" font-size="11" text-anchor="end">Cuestionario Vital</text>
+                            <text x="35" y="150" fill="#d8b4fe" font-size="11" text-anchor="end">Maslow</text>
+                        </svg>
+                    </div>
+                </div>
+                <br>
+
+                <div class="btn-container">
+                    <button type="button" class="btn btn-secundario" onclick="procesarMatrizGeneral()"><i class="fa-solid fa-calculator"></i> Procesar Matriz General</button>
+                    <button type="button" class="btn btn-terciario" onclick="obtenerGraficoRadar()"><i class="fa-solid fa-spider"></i> Obtener Gráfico de Radar</button>
+                    <button type="button" class="btn btn-export" onclick="exportarDatosPaciente()"><i class="fa-solid fa-file-arrow-down"></i> Exportar Datos del Paciente (JSON)</button>
+                    <button type="button" class="btn" onclick="generarYGuardarInformeMatriz()"><i class="fa-solid fa-floppy-disk"></i> Generar Informe y guardar en BD</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Historial de Informes Generales -->
+        <div id="evaluations-history-card" class="card" style="display: none;">
+            <h2><i class="fa-solid fa-timeline"></i> Historial de Informes de Matriz General y Planes de Vida</h2>
+            <div id="evaluations-container">
+                <p style="color: #b19cd9; font-size: 0.9rem; text-align: center; padding: 15px;">Seleccione un paciente para ver sus matrices previas.</p>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let activePatientId = null;
+        let patientDataCache = null;
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof firebase === 'undefined') {
+                alert("Error crítico: Firebase no está disponible.");
+                return;
+            }
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyAd5dyriu-Z2Gms1Tq9u8A75LrQKHd0GC8",
+                authDomain: "aplicacion1-c794d.firebaseapp.com",
+                projectId: "aplicacion1-c794d",
+                storageBucket: "aplicacion1-c794d.firebasestorage.app",
+                messagingSenderId: "310699962592",
+                appId: "1:310699962592:web:71794de4268e47b35da085",
+                measurementId: "G-R3QHSGSNQB"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            initPacientes();
+        });
+
+        async function initPacientes() {
+            try {
+                const querySnapshot = await db.collection("pacientes").get();
+                const selectEl = document.getElementById('eval-patient');
+                selectEl.innerHTML = '<option value="">-- Seleccione un paciente --</option>';
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    const opt = document.createElement('option');
+                    opt.value = docSnap.id;
+                    opt.textContent = data.nombre || data.name || `Paciente (${docSnap.id})`;
+                    selectEl.appendChild(opt);
+                });
+            } catch (error) {
+                console.error("Error al cargar pacientes:", error);
+            }
+        }
+
+        window.loadPatientEvaluations = async function() {
+            activePatientId = document.getElementById('eval-patient').value;
+            const formCard = document.getElementById('eval-form-card');
+            const historyCard = document.getElementById('evaluations-history-card');
+
+            if (!activePatientId) {
+                formCard.style.display = 'none';
+                historyCard.style.display = 'none';
+                patientDataCache = null;
+                return;
+            }
+
+            try {
+                const patientRef = db.collection("pacientes").doc(activePatientId);
+                const patientSnap = await patientRef.get();
+                if (patientSnap.exists) {
+                    patientDataCache = patientSnap.data();
+                }
+            } catch (error) {
+                console.error("Error al cargar datos del paciente:", error);
+            }
+
+            formCard.style.display = 'flex';
+            historyCard.style.display = 'flex';
+            document.getElementById('form-date').valueAsDate = new Date();
+            renderEvaluations();
+        }
+
+        function obtenerUltimosPuntajes() {
+            if (!patientDataCache) return null;
+
+            const getLatest = (arrayName) => {
+                const arr = patientDataCache[arrayName] || [];
+                if (arr.length === 0) return 0;
+                arr.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                return arr[0].puntaje || 0;
+            };
+
+            return {
+                autenticidad: getLatest('evaluaciones_autenticidad'), 
+                urgencia: getLatest('evaluaciones_urgencia_sentido'), 
+                viabilidad: getLatest('evaluaciones_viabilidad_pragmatica'), 
+                vital: getLatest('evaluaciones_cuestionario_vital'), 
+                maslow: getLatest('evaluaciones_maslow') 
+            };
+        }
+
+        function calcularMatrizSintesis() {
+            const scores = obtenerUltimosPuntajes();
+            if (!scores) return null;
+
+            const pAut = (scores.autenticidad / 9) * 100;
+            const pUrg = (scores.urgencia / 9) * 100;
+            const pVia = (scores.viabilidad / 9) * 100;
+            const pVit = (scores.vital / 15) * 100;
+            const pMas = (scores.maslow / 19) * 100;
+
+            const promedioGeneral = Math.round((pAut + pUrg + pVia + pVit + pMas) / 5);
+
+            let perfilClinico = "";
+            let pautasPlanVida = "";
+
+            if (promedioGeneral < 45) {
+                perfilClinico = "Perfil de Alta Vulnerabilidad / Bloqueo Deficitario (Promedio: " + promedioGeneral + "%)";
+                pautasPlanVida = "1. Contención y Regulación Estresor-Alostática: Priorizar la modulación sintomática y el descenso del cortisol antes de formular metas.<br>2. Deconstrucción de Falsos Selfs: Trabajar intensamente en la escucha interna y diferenciación de mandatos ajenos.<br>3. Estabilización de Bases: Asegurar redes de sostén y recursos pragmáticos mínimos.";
+            } else if (promedioGeneral >= 45 && promedioGeneral <= 75) {
+                perfilClinico = "Perfil de Transición y Clarificación Proyectiva (Promedio: " + promedioGeneral + "%)";
+                pautasPlanVida = "1. Metodología de Pasos Posibles: Construir micro-metas de diferenciación y autonomía en espacios seguros.<br>2. Resignificación del Síntoma: Transformar la urgencia sintomática en brújula orientadora hacia deseos postergados.<br>3. Andamiaje Transicional: El terapeuta acompaña activamente en el diseño de agendas de acción.";
+            } else {
+                perfilClinico = "Perfil de Autonomía y Expansión Vital (Promedio: " + promedioGeneral + "%)";
+                pautasPlanVida = "1. Co-creación y Mentoría Estratégica: El plan opera como un plan de expansión y despliegue creativo sostenido.<br>2. Autoría Existencial Genuina: Consolidación de metas complejas orientadas a la autorrealización y legado personal.<br>3. Supervisión Autónoma: El espacio clínico acompaña mediante supervisión estratégica.";
+            }
+
+            return { scores, promedioGeneral, perfilClinico, pautasPlanVida };
+        }
+
+        window.valorarRubrica = function() {
+            procesarMatrizGeneral();
+        }
+
+        function procesarMatrizGeneral() {
+            const res = calcularMatrizSintesis();
+            const preview = document.getElementById('score-preview');
+
+            if (!res) {
+                alert("No se encontraron suficientes datos de evaluaciones previas para este paciente en la base de datos.");
+                return;
+            }
+
+            preview.innerHTML = `
+                <strong>Informe de Matriz General Consolidado:</strong><br><br>
+                <strong>Índice de Madurez Proyectiva:</strong> <span style="color: #ba55d3; font-weight: bold;">${res.perfilClinico}</span><br><br>
+                <strong>Puntajes Históricos de Referencia:</strong><br>
+                - Mapa de Autenticidad: ${res.scores.autenticidad}/9<br>
+                - Urgencia y Sentido: ${res.scores.urgencia}/9<br>
+                - Viabilidad Pragmática: ${res.scores.viabilidad}/9<br>
+                - Cuestionario Vital: ${res.scores.vital}/15<br>
+                - Pirámide de Maslow: ${res.scores.maslow}/19<br><br>
+                <strong>Pautas Orientativas para el Plan de Vida:</strong><br>
+                <em>${res.pautasPlanVida}</em>
+            `;
+        }
+
+        window.obtenerGraficoRadar = function() {
+            const scores = obtenerUltimosPuntajes();
+            if (!scores) {
+                alert("Complete o verifique las evaluaciones del paciente antes de generar el gráfico de radar.");
+                return;
+            }
+
+            const v1 = scores.autenticidad / 9;
+            const v2 = scores.urgencia / 9;
+            const v3 = scores.viabilidad / 9;
+            const v4 = scores.vital / 15;
+            const v5 = scores.maslow / 19;
+
+            const R = 160;
+            const getCoord = (val, angleDeg) => {
+                const rad = (angleDeg - 90) * (Math.PI / 180);
+                const x = 200 + (R * val * Math.cos(rad));
+                const y = 200 + (R * val * Math.sin(rad));
+                return { x, y };
+            };
+
+            const p1 = getCoord(v1, 0);   
+            const p2 = getCoord(v2, 72);  
+            const p3 = getCoord(v3, 144); 
+            const p4 = getCoord(v4, 216); 
+            const p5 = getCoord(v5, 288); 
+
+            const pointsString = `${p1.x},${p1.y} ${p2.x},${p2.y} ${p3.x},${p3.y} ${p4.x},${p4.y} ${p5.x},${p5.y}`;
+
+            document.getElementById('radar-polygon').setAttribute('points', pointsString);
+
+            document.getElementById('dot-1').setAttribute('cx', p1.x); document.getElementById('dot-1').setAttribute('cy', p1.y);
+            document.getElementById('dot-2').setAttribute('cx', p2.x); document.getElementById('dot-2').setAttribute('cy', p2.y);
+            document.getElementById('dot-3').setAttribute('cx', p3.x); document.getElementById('dot-3').setAttribute('cy', p3.y);
+            document.getElementById('dot-4').setAttribute('cx', p4.x); document.getElementById('dot-4').setAttribute('cy', p4.y);
+            document.getElementById('dot-5').setAttribute('cx', p5.x); document.getElementById('dot-5').setAttribute('cy', p5.y);
+
+            document.getElementById('radar-box').style.display = 'block';
+        }
+
+        // Nueva función de exportación de datos completos del paciente
+        window.exportarDatosPaciente = function() {
+            if (!patientDataCache) {
+                alert("No hay datos de paciente cargados para exportar.");
+                return;
+            }
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(patientDataCache, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `expediente_paciente_${activePatientId}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        window.generarYGuardarInformeMatriz = async function() {
+            if (!activePatientId) {
+                alert("Seleccione un paciente primero.");
+                return;
+            }
+
+            const res = calcularMatrizSintesis();
+            if (!res) {
+                alert("No hay datos suficientes para generar la matriz general.");
+                return;
+            }
+
+            procesarMatrizGeneral();
+            obtenerGraficoRadar();
+
+            const nuevoInformeGeneral = {
+                id: Date.now().toString(),
+                fecha: document.getElementById('form-date').value,
+                puntajes: res.scores,
+                promedio: res.promedioGeneral,
+                perfil: res.perfilClinico,
+                pautasPlanVida: res.pautasPlanVida,
+                observaciones: document.getElementById('eval-observaciones').value.trim()
+            };
+
+            try {
+                const patientRef = db.collection("pacientes").doc(activePatientId);
+                let matrices = patientDataCache.matrices_generales || [];
+                matrices.push(nuevoInformeGeneral);
+
+                await patientRef.update({ matrices_generales: matrices });
+                patientDataCache.matrices_generales = matrices;
+                alert('¡Matriz general con gráfico de radar y pautas grabados con éxito en la base de datos!');
+                renderEvaluations();
+            } catch (error) {
+                console.error("Error al guardar informe general:", error);
+                alert("Error al registrar el informe en la base de datos.");
+            }
+        };
+
+        async function renderEvaluations() {
+            const container = document.getElementById('evaluations-container');
+            container.innerHTML = '<p style="color: #c084fc; font-size: 0.9rem; text-align: center;">Cargando matrices previas...</p>';
+
+            try {
+                if (!patientDataCache) return;
+                const matrices = patientDataCache.matrices_generales || [];
+                
+                container.innerHTML = '';
+                if (matrices.length === 0) {
+                    container.innerHTML = '<p style="color: #b19cd9; font-size: 0.9rem; text-align: center; padding: 15px;">No hay matrices generales registradas para este paciente.</p>';
+                    return;
+                }
+
+                matrices.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+
+                matrices.forEach(mat => {
+                    const div = document.createElement('div');
+                    div.className = 'eval-card';
+                    div.innerHTML = `
+                        <div class="eval-header">
+                            <strong style="color: #e2b7ff;"><i class="fa-solid fa-chart-pie"></i> Matriz General (Radar) - Índice Global: ${mat.promedio}%</strong>
+                            <span style="font-size: 0.8rem; color: #d8b4fe;">Fecha: ${mat.fecha}</span>
+                        </div>
+                        <p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Perfil Clínico:</strong> <span style="color: #2ecc71; font-weight: bold;">${mat.perfil}</span></p>
+                        <p style="font-size: 0.85rem; margin-bottom: 5px;"><strong>Pautas Orientativas para el Plan de Vida:</strong><br>${mat.pautasPlanVida}</p>
+                        <p style="font-size: 0.9rem; color: #e5e5e5; white-space: pre-line;"><strong>Notas:</strong> ${mat.observaciones}</p>
+                    `;
+                    container.appendChild(div);
+                });
+            } catch (error) {
+                console.error("Error al renderizar matrices:", error);
+            }
+        }
+    </script>
+</body>
+</html>
