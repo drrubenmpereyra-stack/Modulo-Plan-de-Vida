@@ -1,9 +1,3 @@
-// Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-import { getAuth, signOut } from "firebase/auth";
-import { getFirestore } from "firebase/firestore";
-
-// Your web app's Firebase configuration
 const firebaseConfig = {
   apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
   authDomain: "plan-de-vida-be189.firebaseapp.com",
@@ -13,72 +7,43 @@ const firebaseConfig = {
   appId: "1:970544287065:web:cde28f9a2260f636e95048"
 };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
 
-// Referencias a elementos de la vista
-const loginSection = document.getElementById('login-section');
-const appSection = document.getElementById('app-section');
-const loginForm = document.getElementById('loginForm');
-
-// Comprobar estado de sesión al cargar la página
+// Revisar sesión al cargar
 document.addEventListener('DOMContentLoaded', () => {
-    const currentRole = sessionStorage.getItem('userRole');
-    const currentUserName = sessionStorage.getItem('userName');
-
-    if (currentRole && currentUserName) {
-        mostrarApp(currentRole, currentUserName);
-    } else {
-        mostrarLogin();
+    const role = sessionStorage.getItem('userRole');
+    const name = sessionStorage.getItem('userName');
+    if (role && name) {
+        mostrarApp(role, name);
     }
 });
 
-// Manejo del formulario de Login con acceso fijo del Administrador
-if (loginForm) {
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const userInput = document.getElementById('usuario').value.trim();
-        const passInput = document.getElementById('password').value;
-        const errorMsg = document.getElementById('error-msg');
-        errorMsg.style.display = 'none';
+// Función directa disparada por el botón (sin bloqueos de formularios)
+window.intentarLogin = function() {
+    const userInput = document.getElementById('usuario').value.trim();
+    const passInput = document.getElementById('password').value;
+    const errorMsg = document.getElementById('error-msg');
+    errorMsg.style.display = 'none';
 
-        // Verificación estricta de Credenciales del Administrador
-        if (userInput === "DRPEREYRA" && passInput === "235689") {
-            sessionStorage.setItem('userRole', 'admin');
-            sessionStorage.setItem('userName', 'Dr. Pereyra');
-            mostrarApp('admin', 'Dr. Pereyra');
-            return;
-        }
-
-        // Espacio reservado para las futuras instrucciones de acceso de pacientes
-        // Por ahora, cualquier otro dato genera error de credenciales
-        errorMsg.innerText = "Usuario o contraseña incorrectos.";
+    if (userInput === "DRPEREYRA" && passInput === "235689") {
+        sessionStorage.setItem('userRole', 'admin');
+        sessionStorage.setItem('userName', 'Dr. Pereyra');
+        mostrarApp('admin', 'Dr. Pereyra');
+    } else {
         errorMsg.style.display = 'block';
-    });
-}
-
-function mostrarLogin() {
-    loginSection.style.display = 'flex';
-    appSection.style.display = 'none';
+    }
 }
 
 function mostrarApp(role, userName) {
-    loginSection.style.display = 'none';
-    appSection.style.display = 'flex';
+    document.getElementById('login-section').style.display = 'none';
+    document.getElementById('app-section').style.display = 'flex';
     document.getElementById('displayUser').innerText = `${userName} (${role.toUpperCase()})`;
-    construirMenuNavegacion(role);
-}
-
-function construirMenuNavegacion(role) {
+    
     const navContainer = document.getElementById('dynamicNav');
-    if (!navContainer) return;
-
-    let menuHTML = '';
-
     if (role === 'admin') {
-        menuHTML = `
+        navContainer.innerHTML = `
             <button class="nav-btn" onclick="cargarVista('pacientes.html')">Pacientes</button>
             <div class="nav-item">
                 <button class="dropdown-toggle">Protocolo ▾</button>
@@ -93,37 +58,14 @@ function construirMenuNavegacion(role) {
             </div>
             <button class="nav-btn" onclick="cargarVista('integracion.html')">Integración y conclusiones</button>
         `;
-    } else if (role === 'patient') {
-        menuHTML = `
-            <div class="nav-item">
-                <button class="dropdown-toggle">Protocolo ▾</button>
-                <div class="dropdown-menu">
-                    <button onclick="cargarVista('autorrealizacion.html')">Autorrealización</button>
-                    <button onclick="cargarVista('mapaautenticidad.html')">Mapa de autenticidad</button>
-                    <button onclick="cargarVista('urgenciaysentido.html')">Urgencia y sentido</button>
-                    <button onclick="cargarVista('viaysosten.html')">Viabilidad y sostén</button>
-                    <button onclick="cargarVista('valoracionyfreno.html')">Valoración y freno</button>
-                    <button onclick="cargarVista('explvital.html')">Exploración Vital</button>
-                </div>
-            </div>
-        `;
     }
-    navContainer.innerHTML = menuHTML;
 }
 
-// Funciones globales accesibles desde la interfaz
 window.cargarVista = function(urlPagina) {
-    const iframe = document.getElementById('mainFrame');
-    if (iframe) {
-        iframe.src = urlPagina;
-    }
+    document.getElementById('mainFrame').src = urlPagina;
 }
 
 window.cerrarSesion = function() {
     sessionStorage.clear();
-    signOut(auth).then(() => {
-        mostrarLogin();
-    }).catch(() => {
-        mostrarLogin();
-    });
+    location.reload();
 }
