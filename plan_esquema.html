@@ -51,7 +51,7 @@
         .canvas-container {
             position: relative;
             width: 100%;
-            max-width: 1100px;
+            max-width: 1056px;
             aspect-ratio: 1056 / 912; /* Proporción exacta de la imagen plan_vida.jpg */
             background-image: url('plan_vida.jpg');
             background-size: cover;
@@ -62,54 +62,54 @@
             border: 2px solid rgba(224, 242, 254, 0.2);
         }
 
-        /* Capas de Texto Superpuestas sobre los Paneles de la Imagen */
+        /* Capas de Texto Superpuestas alineadas quirúrgicamente dentro de los recuadros oscuros de la infografía */
         .overlay-box {
             position: absolute;
-            font-size: 0.8rem;
+            font-size: 0.72rem;
             color: #f8fafc;
             overflow-y: auto;
-            padding: 5px;
+            padding: 8px 10px;
             box-sizing: border-box;
             scrollbar-width: thin;
             scrollbar-color: var(--bordo) transparent;
         }
 
-        /* Posicionamiento porcentual exacto sobre los paneles de la infografía */
+        /* Coordenadas exactas ajustadas milimétricamente al interior de los 4 recuadros */
         #box-objetivos {
-            top: 36%;
-            left: 5.5%;
-            width: 32%;
-            height: 27%;
+            top: 39.5%;
+            left: 3.8%;
+            width: 29.5%;
+            height: 25.5%;
         }
 
         #box-metas {
-            top: 36%;
-            right: 5.5%;
-            width: 32%;
-            height: 27%;
+            top: 39.5%;
+            right: 3.8%;
+            width: 29.5%;
+            height: 25.5%;
         }
 
         #box-recursos {
-            bottom: 6%;
-            left: 5.5%;
-            width: 32%;
-            height: 27%;
+            bottom: 5.5%;
+            left: 3.8%;
+            width: 29.5%;
+            height: 25.5%;
         }
 
         #box-tiempos {
-            bottom: 6%;
-            right: 5.5%;
-            width: 32%;
-            height: 27%;
+            bottom: 5.5%;
+            right: 3.8%;
+            width: 29.5%;
+            height: 25.5%;
         }
 
-        /* Contenedor Foto del Paciente ubicado exactamente a un top del 3% desde el borde superior */
+        /* Contenedor Foto del Paciente ubicado en top: 3% del borde superior */
         #box-foto-paciente {
             position: absolute;
             top: 3%;
             left: 50%;
             transform: translateX(-50%);
-            width: 8%;
+            width: 7.5%;
             aspect-ratio: 1;
             border-radius: 50%;
             overflow: hidden;
@@ -128,10 +128,10 @@
         }
 
         .item-line {
-            margin-bottom: 6px;
-            border-bottom: 1px solid rgba(224, 242, 254, 0.1);
-            padding-bottom: 4px;
-            line-height: 1.3;
+            margin-bottom: 5px;
+            border-bottom: 1px solid rgba(224, 242, 254, 0.08);
+            padding-bottom: 3px;
+            line-height: 1.25;
         }
 
         .item-line strong {
@@ -165,7 +165,7 @@
             <img id="paciente-img-src" src="https://via.placeholder.com/150?text=Foto" alt="Paciente" onerror="this.src='https://via.placeholder.com/150?text=Sin+Foto'">
         </div>
 
-        <!-- Paneles de Contenido Dinámico -->
+        <!-- Paneles de Contenido Dinámico ajustados al interior exacto -->
         <div id="box-objetivos" class="overlay-box">Cargando objetivos...</div>
         <div id="box-metas" class="overlay-box">Cargando metas...</div>
         <div id="box-recursos" class="overlay-box">Cargando recursos...</div>
@@ -221,7 +221,7 @@
                 // 3. Metas
                 const metBox = document.getElementById('box-metas');
                 const metas = data.plan_metas || [];
-                metBox.innerHTML = metas.length ? metas.map((m, i) => `<div class="item-line"><strong>${i+1}.</strong> ${m.descripcion}<br><span style="font-size:0.75rem; color:#e0f2fe;">Éxito: ${m.indicador}</span></div>`).join('') : '<em style="color:#cbd5e1;">Sin metas registradas.</em>';
+                metBox.innerHTML = metas.length ? metas.map((m, i) => `<div class="item-line"><strong>${i+1}.</strong> ${m.descripcion}<br><span style="font-size:0.68rem; color:#e0f2fe;">Éxito: ${m.indicador}</span></div>`).join('') : '<em style="color:#cbd5e1;">Sin metas registradas.</em>';
 
                 // 4. Recursos
                 const recBox = document.getElementById('box-recursos');
@@ -231,7 +231,7 @@
                 // 5. Tiempos / Hitos
                 const tieBox = document.getElementById('box-tiempos');
                 const tiempos = data.plan_tiempos || [];
-                tieBox.innerHTML = tiempos.length ? tiempos.map((t, i) => `<div class="item-line"><strong>${t.fase}</strong> (${t.fecha})<br><span style="font-size:0.75rem; color:#e0f2fe;">${t.hitos}</span></div>`).join('') : '<em style="color:#cbd5e1;">Sin cronograma registrado.</em>';
+                tieBox.innerHTML = tiempos.length ? tiempos.map((t, i) => `<div class="item-line"><strong>${t.fase}</strong> (${t.fecha})<br><span style="font-size:0.68rem; color:#e0f2fe;">${t.hitos}</span></div>`).join('') : '<em style="color:#cbd5e1;">Sin cronograma registrado.</em>';
 
             } catch (e) {
                 console.error("Error al cargar datos del plan gráfico:", e);
