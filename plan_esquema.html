@@ -62,7 +62,7 @@
             border: 2px solid rgba(224, 242, 254, 0.2);
         }
 
-        /* Capas de Texto Superpuestas alineadas quirúrgicamente dentro de los recuadros oscuros de la infografía */
+        /* Capas de Texto Superpuestas movidas 10% adicional hacia la derecha */
         .overlay-box {
             position: absolute;
             font-size: 0.72rem;
@@ -74,31 +74,31 @@
             scrollbar-color: var(--bordo) transparent;
         }
 
-        /* Coordenadas exactas ajustadas milimétricamente al interior de los 4 recuadros */
+        /* Coordenadas ajustadas un 10% más a la derecha */
         #box-objetivos {
             top: 39.5%;
-            left: 3.8%;
+            left: 13.8%;
             width: 29.5%;
             height: 25.5%;
         }
 
         #box-metas {
             top: 39.5%;
-            right: 3.8%;
+            right: -6.2%;
             width: 29.5%;
             height: 25.5%;
         }
 
         #box-recursos {
             bottom: 5.5%;
-            left: 3.8%;
+            left: 13.8%;
             width: 29.5%;
             height: 25.5%;
         }
 
         #box-tiempos {
             bottom: 5.5%;
-            right: 3.8%;
+            right: -6.2%;
             width: 29.5%;
             height: 25.5%;
         }
@@ -165,7 +165,7 @@
             <img id="paciente-img-src" src="https://via.placeholder.com/150?text=Foto" alt="Paciente" onerror="this.src='https://via.placeholder.com/150?text=Sin+Foto'">
         </div>
 
-        <!-- Paneles de Contenido Dinámico ajustados al interior exacto -->
+        <!-- Paneles de Contenido Dinámico desplazados 10% a la derecha -->
         <div id="box-objetivos" class="overlay-box">Cargando objetivos...</div>
         <div id="box-metas" class="overlay-box">Cargando metas...</div>
         <div id="box-recursos" class="overlay-box">Cargando recursos...</div>
