@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Cuestionario de Exploración Vital</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        input, select, textarea { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--bordo); 
+            box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); 
+        }
+
+        textarea { width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box; }
+
+        .question-card {
+            background: rgba(8, 51, 68, 0.5);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .question-title {
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 8px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background 0.2s;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .option-label:hover {
+            background-color: rgba(136, 19, 55, 0.2);
+            color: #fff;
+        }
+
+        .option-label input {
+            margin-top: 3px;
+            cursor: pointer;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 14px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 1rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+
+        .patient-info-box {
+            background: rgba(8, 51, 68, 0.7);
+            border-left: 4px solid var(--bordo);
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--cian-light);
+        }
+    </style>
+
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <div class="card">
+            <h2><i class="fa-solid fa-user-circle"></i> Datos del Paciente</h2>
+            <div class="patient-info-box" id="patient-display-box">
+                Cargando datos del paciente conectado...
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fa-solid fa-compass"></i> Cuestionario de Exploración Vital: Identidad, Necesidades y Proyectos[cite: 6]</h2>
+            <form id="vitalForm" onsubmit="event.preventDefault(); guardarInformeEnBD();">
+                <div class="form-grid" style="margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="form-date">Fecha de Evaluación</label>
+                        <input type="date" id="form-date" required>
+                    </div>
+                </div>
+
+                <!-- Pregunta 1 -->
+                <div class="question-card">
+                    <div class="question-title">1. Estado emocional y vital actual: ¿Cómo describirías tu momento presente en términos de energía y sentido vital?[cite: 6]</div>
+                    <label class="option-label"><input type="radio" name="p1" value="1" required> A) Siento un vacío o estancamiento significativo; me cuesta encontrar motivación para el día a día[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p1" value="2"> B) Me encuentro en una etapa de transición o replanteamiento, con momentos de confusión pero también de apertura[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p1" value="3"> C) Tengo claridad sobre quién soy y qué quiero, con energía suficiente para encarar nuevas metas[cite: 6].</label>
+                </div>
+
+                <!-- Pregunta 2 -->
+                <div class="question-card">
+                    <div class="question-title">2. Necesidades de conexión vincular y afectiva: En relación con tus vínculos significativos, ¿cuál es tu situación actual?[cite: 6]</div>
+                    <label class="option-label"><input type="radio" name="p2" value="1" required> A) Predomina la sensación de soledad, incomprensión o dependencia emocional insatisfactoria[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p2" value="2"> B) Mis vínculos son estables, aunque necesito replantear límites y buscar espacios de mayor autonomía[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p2" value="3"> C) Disfruto de redes de apoyo sólidas, nutritivas y recíprocas que validan mi identidad[cite: 6].</label>
+                </div>
+
+                <!-- Pregunta 3 -->
+                <div class="question-card">
+                    <div class="question-title">3. Deseos de autorrealización y desarrollo personal: Al pensar en tus aspiraciones personales postergadas, ¿qué experimentas?[cite: 6]</div>
+                    <label class="option-label"><input type="radio" name="p3" value="1" required> A) Desconozco cuáles son mis deseos reales; he vivido priorizando las demandas de los demás[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p3" value="2"> B) Identifico intereses claros, pero me frena el miedo o la falta de método[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p3" value="3"> C) Tengo proyectos formativos o creativos definidos y solo busco el momento oportuno para implementarlos[cite: 6].</label>
+                </div>
+
+                <!-- Pregunta 4 -->
+                <div class="question-card">
+                    <div class="question-title">4. Rol laboral, ocupacional y sentido de contribución: Respecto a tu actividad productiva o rol ocupacional:[cite: 6]</div>
+                    <label class="option-label"><input type="radio" name="p4" value="1" required> A) Me siento agotada, desvinculada del propósito inicial o experimentando desgaste profesional[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p4" value="2"> B) Siento la necesidad de reconvertirme, buscar un nuevo enfoque o actividades con mayor sentido[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p4" value="3"> C) Mi ocupación actual me resulta estimulante, alineada con mis valores y fuente de gratificación[cite: 6].</label>
+                </div>
+
+                <!-- Pregunta 5 -->
+                <div class="question-card">
+                    <div class="question-title">5. Gestión del cambio y neurobiología de la flexibilidad: Frente a la posibilidad de iniciar un nuevo proyecto, ¿cómo reacciona tu sistema?[cite: 6]</div>
+                    <label class="option-label"><input type="radio" name="p5" value="1" required> A) Me genera mucha ansiedad, resistencia al cambio y pensamientos de incapacidad ("ya es tarde")[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p5" value="2"> B) Siento incertidumbre, pero también curiosidad y disposición para entrenar nuevos hábitos[cite: 6].</label>
+                    <label class="option-label"><input type="radio" name="p5" value="3"> C) Acepto el desafío con entusiasmo, interpretando esta etapa como una oportunidad de reinvención[cite: 6].</label>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label for="eval-observaciones">Observaciones Clínicas / Notas</label>
+                    <textarea id="eval-observaciones" placeholder="Detalle contextual o reflexiones sobre su exploración vital..."></textarea>
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Guardar Respuestas del Cuestionario</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let activePatientDocId = null;
+        let activePatientName = "";
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            document.getElementById('form-date').valueAsDate = new Date();
+            await identificarPacienteConectado();
+        });
+
+        async function identificarPacienteConectado() {
+            const userName = sessionStorage.getItem('userName');
+            const userRole = sessionStorage.getItem('userRole');
+            const displayBox = document.getElementById('patient-display-box');
+
+            if (!userName) {
+                displayBox.innerHTML = "No hay sesión activa. Ingrese desde el login.";
+                return;
+            }
+
+            if (userRole === 'admin') {
+                displayBox.innerHTML = `<strong>Modo Administrador:</strong> Visualizando como panel general.`;
+                return;
+            }
+
+            try {
+                const querySnapshot = await db.collection("pacientes").get();
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.nombre && data.nombre.toLowerCase().includes(userName.toLowerCase())) {
+                        activePatientDocId = docSnap.id;
+                        activePatientName = data.nombre;
+                    }
+                });
+
+                if (activePatientDocId) {
+                    displayBox.innerHTML = `<strong>Paciente Conectado:</strong> ${activePatientName}`;
+                } else {
+                    displayBox.innerHTML = `<strong>Paciente:</strong> ${userName}`;
+                }
+            } catch (error) {
+                displayBox.innerHTML = `<strong>Paciente:</strong> ${userName}`;
+            }
+        }
+
+        window.guardarInformeEnBD = async function() {
+            const r1 = document.querySelector('input[name="p1"]:checked');
+            const r2 = document.querySelector('input[name="p2"]:checked');
+            const r3 = document.querySelector('input[name="p3"]:checked');
+            const r4 = document.querySelector('input[name="p4"]:checked');
+            const r5 = document.querySelector('input[name="p5"]:checked');
+
+            if (!r1 || !r2 || !r3 || !r4 || !r5) {
+                alert("Por favor responda todas las preguntas antes de guardar.");
+                return;
+            }
+
+            const v1 = parseInt(r1.value);
+            const v2 = parseInt(r2.value);
+            const v3 = parseInt(r3.value);
+            const v4 = parseInt(r4.value);
+            const v5 = parseInt(r5.value);
+            const totalScore = v1 + v2 + v3 + v4 + v5;
+
+            let rangeTitle = "";
+            let interpretationText = "";
+            let orientationText = "";
+
+            if (totalScore >= 5 && totalScore <= 8) {
+                rangeTitle = `Fase de Reestructuración Profunda y Contención (Puntaje: ${totalScore}/15)[cite: 6]`;
+                interpretationText = "La paciente atraviesa un bloqueo significativo, posiblemente asociado a crisis de mitad de vida o desgaste en circuitos de recompensa[cite: 6].";
+                orientationText = "Priorizar regulación emocional, procesamiento de duelos y disminución de autoexigencia[cite: 6].";
+            } else if (totalScore >= 9 && totalScore <= 12) {
+                rangeTitle = `Fase de Transición y Clarificación (Puntaje: ${totalScore}/15)[cite: 6]`;
+                interpretationText = "Toma de conciencia clara sobre el cambio, pero coexisten ambivalencias y temores[cite: 6].";
+                orientationText = "Intervención focalizada en decisiones mediante micro-metas estructuradas[cite: 6].";
+            } else {
+                rangeTitle = `Fase de Consolidación y Expansión (Puntaje: ${totalScore}/15)[cite: 6]`;
+                interpretationText = "Recursos yoicos sólidos, estabilidad vincular y deseo claro de autorrealización[cite: 6].";
+                orientationText = "Diseño estratégico de proyectos a mediano y largo plazo y liderazgo personal[cite: 6].";
+            }
+
+            const nuevaEvaluacion = {
+                id: Date.now().toString(),
+                fecha: document.getElementById('form-date').value,
+                respuestas: { p1: v1, p2: v2, p3: v3, p4: v4, p5: v5 },
+                puntaje: totalScore,
+                categoria: rangeTitle,
+                interpretacion: interpretationText,
+                orientacion: orientationText,
+                observaciones: document.getElementById('eval-observaciones').value.trim()
+            };
+
+            try {
+                if (activePatientDocId) {
+                    const patientRef = db.collection("pacientes").doc(activePatientDocId);
+                    const patientSnap = await patientRef.get();
+                    let evaluaciones = patientSnap.data().evaluaciones_cuestionario_vital || [];
+                    evaluaciones.push(nuevaEvaluacion);
+
+                    await patientRef.update({ evaluaciones_cuestionario_vital: evaluaciones });
+                    alert('¡Respuestas de Exploración Vital guardadas con éxito!');
+                } else {
+                    await db.collection("evaluaciones_vital_generales").add({
+                        usuario: sessionStorage.getItem('userName') || 'Desconocido',
+                        ...nuevaEvaluacion
+                    });
+                    alert('¡Cuestionario guardado con éxito!');
+                }
+                document.getElementById('vitalForm').reset();
+                document.getElementById('form-date').valueAsDate = new Date();
+            } catch (error) {
+                alert("Error al registrar las respuestas en la base de datos.");
+            }
+        };
+    </script>
+</body>
+</html>
