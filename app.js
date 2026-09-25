@@ -1,6 +1,6 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app";
-import { getAuth, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { getAuth, signOut } from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
@@ -18,7 +18,7 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Referencias a elementos de la vista única
+// Referencias a elementos de la vista
 const loginSection = document.getElementById('login-section');
 const appSection = document.getElementById('app-section');
 const loginForm = document.getElementById('loginForm');
@@ -35,15 +35,16 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Manejo del formulario de Login dentro del mismo archivo
+// Manejo del formulario de Login con acceso fijo del Administrador
 if (loginForm) {
-    loginForm.addEventListener('submit', async (e) => {
+    loginForm.addEventListener('submit', (e) => {
         e.preventDefault();
         const userInput = document.getElementById('usuario').value.trim();
         const passInput = document.getElementById('password').value;
         const errorMsg = document.getElementById('error-msg');
+        errorMsg.style.display = 'none';
 
-        // Validación Administrador
+        // Verificación estricta de Credenciales del Administrador
         if (userInput === "DRPEREYRA" && passInput === "235689") {
             sessionStorage.setItem('userRole', 'admin');
             sessionStorage.setItem('userName', 'Dr. Pereyra');
@@ -51,18 +52,10 @@ if (loginForm) {
             return;
         }
 
-        // Validación Paciente contra Firebase Auth
-        try {
-            const emailToAuth = userInput.includes('@') ? userInput : `${userInput.toLowerCase()}@clinica.com`;
-            await signInWithEmailAndPassword(auth, emailToAuth, passInput);
-            
-            sessionStorage.setItem('userRole', 'patient');
-            sessionStorage.setItem('userName', userInput);
-            mostrarApp('patient', userInput);
-        } catch (error) {
-            console.error("Error de autenticación:", error);
-            errorMsg.style.display = 'block';
-        }
+        // Espacio reservado para las futuras instrucciones de acceso de pacientes
+        // Por ahora, cualquier otro dato genera error de credenciales
+        errorMsg.innerText = "Usuario o contraseña incorrectos.";
+        errorMsg.style.display = 'block';
     });
 }
 
