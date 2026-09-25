@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Clínica de la Convergencia - Módulo Plan de Vida</title>
+    
+    <!-- Firebase App (Core) y SDKs mediante CDN Global -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --primary-color: #1e3a8a;
@@ -26,7 +32,7 @@
             overflow: hidden;
         }
 
-        /* --- VISTA DE LOGIN (Oculta por defecto cuando hay sesión) --- */
+        /* --- VISTA DE LOGIN --- */
         #login-section {
             display: flex;
             justify-content: center;
@@ -116,7 +122,7 @@
             display: none;
         }
 
-        /* --- VISTA DE APLICACIÓN / DASHBOARD (Oculta hasta iniciar sesión) --- */
+        /* --- VISTA DE APLICACIÓN --- */
         #app-section {
             display: none;
             flex-direction: column;
@@ -261,15 +267,11 @@
         </div>
     </div>
 
-    <!-- SECCIÓN 2: APLICACIÓN PRINCIPAL (PANEL + IFRAME) -->
+    <!-- SECCIÓN 2: APLICACIÓN PRINCIPAL -->
     <div id="app-section">
         <header>
             <div class="brand">Clínica de la Convergencia | Plan de Vida</div>
-            
-            <nav id="dynamicNav">
-                <!-- Se inyecta dinámicamente mediante app.js -->
-            </nav>
-
+            <nav id="dynamicNav"></nav>
             <div class="user-info">
                 <span id="displayUser">Usuario</span>
                 <button class="btn-logout" onclick="cerrarSesion()">Salir</button>
@@ -281,7 +283,7 @@
         </div>
     </div>
 
-    <!-- Script Lógico -->
-    <script type="module" src="app.js"></script>
+    <!-- Script Lógico principal sin conflictos de módulos ES -->
+    <script src="app.js"></script>
 </body>
 </html>
