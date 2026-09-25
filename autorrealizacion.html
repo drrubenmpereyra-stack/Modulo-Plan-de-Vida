@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica de la Convergencia - Cuestionario de Autorrealización (Pirámide de Maslow)</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-cian: #083344;
+            --cian-card: #0f4c5c;
+            --cian-light: #e0f2fe;
+            --bordo: #881337;
+            --bordo-hover: #4c0519;
+            --text-main: #f8fafc;
+            --text-muted: #cbd5e1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #042f2e 0%, var(--bg-cian) 100%);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px;
+            box-sizing: border-box;
+        }
+
+        .container { max-width: 1000px; margin: 0 auto; display: flex; flex-direction: column; gap: 20px; }
+        
+        .card { 
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 100%;
+            background: rgba(15, 76, 92, 0.85);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            box-sizing: border-box;
+        }
+
+        h2 { 
+            color: #ffffff; 
+            font-size: 1.25rem; 
+            margin-top: 0; 
+            display: flex; 
+            align-items: center; 
+            gap: 10px; 
+            border-bottom: 2px solid rgba(224, 242, 254, 0.2); 
+            padding-bottom: 12px; 
+        }
+
+        .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 5px; }
+        @media (max-width: 768px) { .form-grid { grid-template-columns: 1fr; } }
+
+        .form-group { display: flex; flex-direction: column; gap: 5px; text-align: left; }
+        label { font-size: 0.9rem; font-weight: 600; color: var(--cian-light); }
+        
+        input, select, textarea { 
+            padding: 12px; 
+            background: rgba(8, 51, 68, 0.6); 
+            border: 1px solid rgba(224, 242, 254, 0.2); 
+            border-radius: 8px; 
+            font-size: 0.95rem; 
+            color: #fff; 
+            outline: none; 
+            transition: all 0.3s ease; 
+        }
+        
+        input:focus, select:focus, textarea:focus { 
+            border-color: var(--bordo); 
+            box-shadow: 0 0 0 3px rgba(136, 19, 55, 0.4); 
+        }
+
+        select option { background: #083344; color: #fff; }
+        textarea { width: 100%; min-height: 100px; resize: vertical; box-sizing: border-box; }
+
+        .question-card {
+            background: rgba(8, 51, 68, 0.5);
+            border: 1px solid rgba(224, 242, 254, 0.15);
+            padding: 18px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: left;
+        }
+
+        .question-title {
+            color: #ffffff;
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .option-label {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 8px 10px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            font-weight: normal;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .option-label:hover {
+            background-color: rgba(136, 19, 55, 0.2);
+            color: #fff;
+        }
+
+        .option-label input {
+            margin-top: 4px;
+            cursor: pointer;
+        }
+
+        .btn { 
+            background-color: var(--bordo); 
+            color: white; 
+            border: none; 
+            padding: 14px 24px; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: 600; 
+            font-size: 1rem; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            gap: 8px; 
+            box-shadow: 0 4px 15px rgba(136, 19, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+        .btn:hover { background-color: var(--bordo-hover); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(136, 19, 55, 0.6); }
+
+        .patient-info-box {
+            background: rgba(8, 51, 68, 0.7);
+            border-left: 4px solid var(--bordo);
+            padding: 12px 15px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            color: var(--cian-light);
+        }
+    </style>
+
+    <!-- SDKs de Firebase Compat alineados -->
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+    <main class="container">
+        <!-- Tarjeta de Identificación de Paciente -->
+        <div class="card">
+            <h2><i class="fa-solid fa-user-circle"></i> Datos del Paciente</h2>
+            <div class="patient-info-box" id="patient-display-box">
+                Cargando datos del paciente conectado...
+            </div>
+        </div>
+
+        <!-- Tarjeta Principal del Cuestionario -->
+        <div class="card">
+            <h2><i class="fa-solid fa-mountain"></i> Cuestionario de Autorrealización - Pirámide de Maslow</h2>
+            <form id="maslowForm" onsubmit="event.preventDefault(); guardarInformeEnBD();">
+                <div class="form-grid" style="margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="form-date">Fecha de Evaluación</label>
+                        <input type="date" id="form-date" required>
+                    </div>
+                </div>
+
+                <!-- Pregunta 1 -->
+                <div class="question-card">
+                    <div class="question-title">1. Necesidades Fisiológicas y de Supervivencia: ¿Cómo evalúas tu satisfacción actual en cuanto a descanso, salud física, alimentación y estabilidad biológica básica?</div>
+                    <label class="option-label">
+                        <input type="radio" name="p1" value="1" required>
+                        <span>A) Siento un desgaste físico constante, problemas crónicos de sueño o descuido de mis necesidades corporales básicas.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p1" value="2">
+                        <span>B) Cubro lo elemental, pero el estrés diario interfiere frecuentemente con mi bienestar físico y descanso.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p1" value="3">
+                        <span>C) Mantengo hábitos saludables sólidos, descanso adecuado y vitalidad física óptima.</span>
+                    </label>
+                </div>
+
+                <!-- Pregunta 2 -->
+                <div class="question-card">
+                    <div class="question-title">2. Necesidades de Seguridad y Protección: En relación con tu estabilidad financiera, entorno habitacional y sensación de predictibilidad a futuro:</div>
+                    <label class="option-label">
+                        <input type="radio" name="p2" value="1" required>
+                        <span>A) Experimento alta vulnerabilidad económica, inseguridad laboral o temor persistente ante el futuro.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p2" value="2">
+                        <span>B) Tengo estabilidad básica, aunque me genera ansiedad la incertidumbre económica a mediano plazo o los cambios imprevistos.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p2" value="3">
+                        <span>C) Cuento con un sólido respaldo financiero, vivienda segura y tranquilidad respecto a mi estabilidad.</span>
+                    </label>
+                </div>
+
+                <!-- Pregunta 3 -->
+                <div class="question-card">
+                    <div class="question-title">3. Necesidades de Amor, Pertenencia y Afiliación: Al observar tus relaciones interpersonales (familia, pareja, amistades, comunidad):</div>
+                    <label class="option-label">
+                        <input type="radio" name="p3" value="1" required>
+                        <span>A) Predomina el aislamiento, la soledad no deseada o la pertenencia a vínculos poco nutritivos o conflictivos.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p3" value="2">
+                        <span>B) Tengo algunos vínculos significativos, pero siento que carezco de una red de pertenencia profunda o espacios de genuina complicidad.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p3" value="3">
+                        <span>C) Disfruto de un sentido de pertenencia claro, con relaciones afectivas profundas, seguras y de reciprocidad.</span>
+                    </label>
+                </div>
+
+                <!-- Pregunta 4 -->
+                <div class="question-card">
+                    <div class="question-title">4. Necesidades de Estima y Reconocimiento: Respecto a tu autovaloración, respeto propio y el reconocimiento de tus logros:</div>
+                    <label class="option-label">
+                        <input type="radio" name="p4" value="1" required>
+                        <span>A) Suelo minimizar mis capacidades, experimentando baja autoestima, síndrome del impostor o dependencia de la validación externa.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p4" value="3">
+                        <span>B) Reconozco mis logros pasados, pero dudo de mi valor actual o me cuesta proyectarme con confianza en nuevos roles.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p4" value="5">
+                        <span>C) Poseo una sólida autoestima, confianza en mis competencias y un claro reconocimiento de mi valor personal.</span>
+                    </label>
+                </div>
+
+                <!-- Pregunta 5 -->
+                <div class="question-card">
+                    <div class="question-title">5. Necesidades de Autorrealización y Propósito: En la cúspide de tus aspiraciones personales, creatividad y desarrollo del potencial humano:</div>
+                    <label class="option-label">
+                        <input type="radio" name="p5" value="1" required>
+                        <span>A) Siento que mi vida se reduce a la supervivencia y rutina; no encuentro espacio para la creatividad o el crecimiento espiritual/personal.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p5" value="3">
+                        <span>B) Tengo inquietudes artísticas, intelectuales o de trascendencia postergadas, y busco activamente un sentido más profundo para esta etapa.</span>
+                    </label>
+                    <label class="option-label">
+                        <input type="radio" name="p5" value="5">
+                        <span>C) Experimento plenitud creativa, desarrollo de proyectos vitales significativos y una profunda conexión con mi propósito de vida.</span>
+                    </label>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 25px;">
+                    <label for="eval-observaciones">Observaciones Clínicas / Notas del Paciente o Terapeuta</label>
+                    <textarea id="eval-observaciones" placeholder="Detalle contextual o reflexiones sobre la evaluación de Maslow..."></textarea>
+                </div>
+
+                <div style="text-align: center;">
+                    <button type="submit" class="btn"><i class="fa-solid fa-floppy-disk"></i> Guardar Respuestas del Cuestionario</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <script>
+        let db;
+        let activePatientDocId = null;
+        let activePatientName = "";
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (typeof firebase === 'undefined') {
+                alert("Error crítico: Firebase no está disponible.");
+                return;
+            }
+
+            const firebaseConfig = {
+              apiKey: "AIzaSyD_ru-VW32S77NlTJgpV7gHBrSDBEUNZPs",
+              authDomain: "plan-de-vida-be189.firebaseapp.com",
+              projectId: "plan-de-vida-be189",
+              storageBucket: "plan-de-vida-be189.firebasestorage.app",
+              messagingSenderId: "970544287065",
+              appId: "1:970544287065:web:cde28f9a2260f636e95048"
+            };
+
+            if (!firebase.apps.length) {
+                firebase.initializeApp(firebaseConfig);
+            }
+            db = firebase.firestore();
+
+            document.getElementById('form-date').valueAsDate = new Date();
+            await identificarPacienteConectado();
+        });
+
+        async function identificarPacienteConectado() {
+            const userName = sessionStorage.getItem('userName');
+            const userRole = sessionStorage.getItem('userRole');
+            const displayBox = document.getElementById('patient-display-box');
+
+            if (!userName) {
+                displayBox.innerHTML = "No hay una sesión activa detectada. Por favor, ingrese desde el login.";
+                return;
+            }
+
+            if (userRole === 'admin') {
+                displayBox.innerHTML = `<strong>Modo Administrador (Dr. Pereyra):</strong> Visualizando como panel de control general. Seleccione un paciente en la sección de pacientes o complete de forma genérica.`;
+                return;
+            }
+
+            // Si es un paciente, buscamos su ID exacto en Firestore mediante su nombre/apellido
+            try {
+                const querySnapshot = await db.collection("pacientes").get();
+                querySnapshot.forEach(docSnap => {
+                    const data = docSnap.data();
+                    if (data.nombre && data.nombre.toLowerCase().includes(userName.toLowerCase())) {
+                        activePatientDocId = docSnap.id;
+                        activePatientName = data.nombre;
+                    }
+                });
+
+                if (activePatientDocId) {
+                    displayBox.innerHTML = `<strong>Paciente Conectado:</strong> ${activePatientName}`;
+                } else {
+                    displayBox.innerHTML = `<strong>Paciente:</strong> ${userName} (Registro temporal)`;
+                }
+            } catch (error) {
+                console.error("Error al buscar paciente:", error);
+                displayBox.innerHTML = `<strong>Paciente:</strong> ${userName}`;
+            }
+        }
+
+        function calcularDatosRubrica() {
+            const p1 = document.querySelector('input[name="p1"]:checked');
+            const p2 = document.querySelector('input[name="p2"]:checked');
+            const p3 = document.querySelector('input[name="p3"]:checked');
+            const p4 = document.querySelector('input[name="p4"]:checked');
+            const p5 = document.querySelector('input[name="p5"]:checked');
+
+            if (!p1 || !p2 || !p3 || !p4 || !p5) {
+                return null;
+            }
+
+            const val1 = parseInt(p1.value);
+            const val2 = parseInt(p2.value);
+            const val3 = parseInt(p3.value);
+            const val4 = parseInt(p4.value);
+            const val5 = parseInt(p5.value);
+
+            const totalScore = val1 + val2 + val3 + val4 + val5;
+
+            let rangeTitle = "";
+            let interpretationText = "";
+            let orientationText = "";
+
+            if (totalScore >= 5 && totalScore <= 9) {
+                rangeTitle = `Puntaje Total: ${totalScore}/19 - Déficit en Bases Inferiores`;
+                interpretationText = "Las necesidades deficitarias básicas (fisiológicas, de seguridad o afiliación) se encuentran insatisfechas o amenazadas.";
+                orientationText = "Se requiere contención, estabilización de crisis vitales y autocuidado físico.";
+            } else if (totalScore >= 10 && totalScore <= 14) {
+                rangeTitle = `Puntaje Total: ${totalScore}/19 - Transición y Consolidación Intermedia`;
+                interpretationText = "Las necesidades de supervivencia están cubiertas, pero existe un estancamiento en estima o búsqueda incipiente de pertenencia.";
+                orientationText = "Trabajo enfocado en fortalecer el autoconcepto y habilitar espacios seguros de exploración creativa.";
+            } else {
+                rangeTitle = `Puntaje Total: ${totalScore}/19 - Orientación hacia la Autorrealización`;
+                interpretationText = "Las necesidades inferiores están satisfechas; el foco motivacional se sitúa en la cúspide de la pirámide.";
+                orientationText = "Orientado al diseño de proyectos de vida de alto impacto personal y expansión del potencial humano.";
+            }
+
+            return { val1, val2, val3, val4, val5, totalScore, rangeTitle, interpretationText, orientationText };
+        }
+
+        window.guardarInformeEnBD = async function() {
+            const resultado = calcularDatosRubrica();
+            if (!resultado) {
+                alert("Por favor, responda todas las preguntas del cuestionario antes de guardar.");
+                return;
+            }
+
+            const nuevaEvaluacion = {
+                id: Date.now().toString(),
+                fecha: document.getElementById('form-date').value,
+                respuestas: { p1: resultado.val1, p2: resultado.val2, p3: resultado.val3, p4: resultado.val4, p5: resultado.val5 },
+                puntaje: resultado.totalScore,
+                categoria: resultado.rangeTitle,
+                interpretacion: resultado.interpretationText,
+                orientacion: resultado.orientationText,
+                observaciones: document.getElementById('eval-observaciones').value.trim()
+            };
+
+            try {
+                if (activePatientDocId) {
+                    const patientRef = db.collection("pacientes").doc(activePatientDocId);
+                    const patientSnap = await patientRef.get();
+                    let evaluaciones = patientSnap.data().evaluaciones_maslow || [];
+                    evaluaciones.push(nuevaEvaluacion);
+
+                    await patientRef.update({ evaluaciones_maslow: evaluaciones });
+                    alert('¡Las respuestas y el informe de Maslow se han guardado con éxito en la base de datos!');
+                } else {
+                    // Si ingresó como admin o no se vinculó un ID de paciente exacto, guardamos en una colección general o alertamos
+                    await db.collection("evaluaciones_maslow_generales").add({
+                        usuario: sessionStorage.getItem('userName') || 'Desconocido',
+                        ...nuevaEvaluacion
+                    });
+                    alert('¡Cuestionario guardado exitosamente en el sistema!');
+                }
+                document.getElementById('maslowForm').reset();
+                document.getElementById('form-date').valueAsDate = new Date();
+            } catch (error) {
+                console.error("Error al guardar evaluación:", error);
+                alert("Error al registrar las respuestas en la base de datos.");
+            }
+        };
+    </script>
+</body>
+</html>
