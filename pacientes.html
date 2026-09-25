@@ -229,7 +229,7 @@
                         <th>Teléfono</th>
                         <th>Acciones</th>
                     </tr>
-                 dulces</thead>
+                </thead>
                 <tbody id="patientsTableBody">
                     <tr>
                         <td colspan="6" style="text-align: center; color: var(--text-muted);">Cargando pacientes...</td>
@@ -273,11 +273,14 @@
                 snapshot.forEach((doc) => {
                     const p = doc.data();
                     const id = doc.id;
-                    const fotoSrc = p.foto ? p.foto : 'https://via.placeholder.com/36?text=Foto';
+                    
+                    // Avatar predeterminado seguro en SVG integrado
+                    const defaultAvatar = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="%23881337" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>';
+                    const fotoSrc = p.foto ? p.foto : defaultAvatar;
 
                     tbody.innerHTML += `
                         <tr>
-                            <td><img src="${fotoSrc}" alt="Foto" class="patient-avatar" onerror="this.src='https://via.placeholder.com/36?text=User'"></td>
+                            <td><img src="${fotoSrc}" alt="Foto" class="patient-avatar" onerror="this.src='${defaultAvatar}'"></td>
                             <td><strong>${p.codigo || ''}</strong></td>
                             <td>${p.nombre || ''}</td>
                             <td>${p.dni || ''}</td>
